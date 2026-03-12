@@ -1,0 +1,25 @@
+{
+  "name": "g-claude-code-plugins",
+  "owner": {
+    "name": "cheng-pang",
+    "email": "pangcheng33@gmail.com"
+  },
+  "metadata": {
+    "description": "A collection of Claude Code plugins",
+    "version": "1.0.0",
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "example-plugin",
+      "source": "./plugins/example-plugin",
+      "description": "An example plugin with skill, agent, and hook",
+      "version": "1.0.0",
+      "author": {
+        "name": "bytedance"
+      },
+      "category": "development",
+      "tags": ["example", "starter"]
+    }
+  ]
+}

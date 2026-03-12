@@ -1,0 +1,13 @@
+{
+  "name": "example-plugin",
+  "description": "An example plugin with skill, agent, and hook",
+  "version": "1.0.0",
+  "author": {
+    "name": "cheng-pang"
+  },
+  "license": "MIT",
+  "keywords": ["example", "starter"],
+  "skills": "./skills",
+  "agents": "./agents",
+  "hooks": "./hooks/hooks.json"
+}
