@@ -20,6 +20,17 @@
       },
       "category": "development",
       "tags": ["example", "starter"]
+    },
+    {
+      "name": "g-feishu",
+      "source": "./plugins/g-feishu",
+      "description": "Feishu (Lark) integration skills for Claude Code",
+      "version": "1.0.0",
+      "author": {
+        "name": "cheng-pang"
+      },
+      "category": "productivity",
+      "tags": ["feishu", "lark"]
     }
   ]
 }

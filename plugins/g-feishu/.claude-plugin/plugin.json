@@ -1,0 +1,11 @@
+{
+  "name": "g-feishu",
+  "description": "Feishu (Lark) integration skills for Claude Code",
+  "version": "1.0.0",
+  "author": {
+    "name": "cheng-pang"
+  },
+  "license": "MIT",
+  "keywords": ["feishu", "lark", "productivity"],
+  "skills": "./skills"
+}
