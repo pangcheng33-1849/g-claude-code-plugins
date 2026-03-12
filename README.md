@@ -51,6 +51,20 @@ plugins/
 3. Add skills, agents, hooks as needed
 4. Register it in `.claude-plugin/marketplace.json`
 
+## Local Development
+
+Load a single plugin directly for development:
+
+```bash
+claude --plugin-dir ./plugins/my-plugin
+```
+
+After editing files, reload without restarting:
+
+```bash
+/reload-plugins
+```
+
 ## Contributing
 
 Submit a PR with your plugin following the structure above.
