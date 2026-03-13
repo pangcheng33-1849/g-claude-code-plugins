@@ -73,7 +73,7 @@ CODE_LANGUAGE_MAP = {
     "graphql": 71,
     "toml": 75,
 }
-TEMP_ELLIPSIS_MARKER = "__CODEX_LITERAL_ELLIPSIS__"
+TEMP_ELLIPSIS_MARKER = "__G_FEISHU_LITERAL_ELLIPSIS__"
 IMPORT_EXTRA_HINTS = {
     "1000": "导入内容块数量超过新版文档上限，超出部分被截断。",
     "1001": "导入表格单元格数量超过新版文档上限，超出部分被截断。",
@@ -278,7 +278,7 @@ def resolve_user_open_id_by_query(query: str, *, bearer_token: str | None = None
             break
 
     if not matches_by_open_id:
-        raise SystemExit(f"No Feishu user found for query: {trimmed}")
+        raise SystemExit(f"No GFeishu user found for query: {trimmed}")
 
     exact_matches = []
     needle = normalize(trimmed)
@@ -304,7 +304,7 @@ def resolve_user_open_id_by_query(query: str, *, bearer_token: str | None = None
             for user in candidate_users[:5]
         ]
         raise SystemExit(
-            "Multiple Feishu users matched the query. Refine the name/email or pass an explicit open_id. "
+            "Multiple GFeishu users matched the query. Refine the name/email or pass an explicit open_id. "
             f"Candidates: {summary}"
         )
 
@@ -405,7 +405,7 @@ def resolve_target_for_api(target: dict[str, object], bearer_token: str) -> dict
 
 
 def resolve_task_state_dir(explicit_dir: str | None = None) -> pathlib.Path:
-    raw_dir = explicit_dir or os.getenv("FEISHU_DOC_TASK_DIR") or str(pathlib.Path.home() / ".feishu-doc-tasks")
+    raw_dir = explicit_dir or os.getenv("FEISHU_DOC_TASK_DIR") or str(pathlib.Path.home() / ".g-feishu-doc-tasks")
     task_dir = pathlib.Path(raw_dir).expanduser().resolve()
     task_dir.mkdir(parents=True, exist_ok=True)
     return task_dir

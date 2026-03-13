@@ -78,9 +78,9 @@ def seed_created_whiteboards(
     temp_seed_map: dict[str, dict[str, object]] = {}
     for block in descendants:
         block_id = block.get("block_id")
-        seed_kind = block.get("_codex_whiteboard_seed_kind")
-        seed_text = block.get("_codex_whiteboard_seed_text")
-        plantuml_code = block.get("_codex_whiteboard_plantuml_code")
+        seed_kind = block.get("_g_feishu_whiteboard_seed_kind")
+        seed_text = block.get("_g_feishu_whiteboard_seed_text")
+        plantuml_code = block.get("_g_feishu_whiteboard_plantuml_code")
         if isinstance(block_id, str) and isinstance(seed_text, str) and seed_text.strip():
             temp_seed_map[block_id] = {
                 "kind": "text",
@@ -90,9 +90,9 @@ def seed_created_whiteboards(
             temp_seed_map[block_id] = {
                 "kind": str(seed_kind or "plantuml"),
                 "diagram_code": plantuml_code.strip(),
-                "syntax_type": block.get("_codex_whiteboard_plantuml_syntax_type"),
-                "style_type": block.get("_codex_whiteboard_plantuml_style_type"),
-                "diagram_type": block.get("_codex_whiteboard_plantuml_diagram_type"),
+                "syntax_type": block.get("_g_feishu_whiteboard_plantuml_syntax_type"),
+                "style_type": block.get("_g_feishu_whiteboard_plantuml_style_type"),
+                "diagram_type": block.get("_g_feishu_whiteboard_plantuml_diagram_type"),
             }
     if not temp_seed_map:
         return []

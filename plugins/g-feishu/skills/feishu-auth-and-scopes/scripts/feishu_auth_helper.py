@@ -20,7 +20,7 @@ from feishu_auth_runtime.command_ops import (
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Standalone Feishu auth and scope helper.")
+    parser = argparse.ArgumentParser(description="Standalone GFeishu auth and scope helper.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     required_identity = subparsers.add_parser("required-identity", help="Infer the likely identity and token type for an operation.")
@@ -31,7 +31,7 @@ def build_parser() -> argparse.ArgumentParser:
     oauth_url.add_argument("--app-id", default=os.getenv("MY_LARK_APP_ID"), help="Defaults to MY_LARK_APP_ID.")
     oauth_url.add_argument("--redirect-uri", required=True)
     oauth_url.add_argument("--scopes", nargs="+", required=True)
-    oauth_url.add_argument("--state", default="codex-state")
+    oauth_url.add_argument("--state", default="g-feishu-state")
     oauth_url.add_argument("--response-type", default="code")
     oauth_url.set_defaults(func=cmd_oauth_url)
 
@@ -48,7 +48,7 @@ def build_parser() -> argparse.ArgumentParser:
     user_token_curl.add_argument("--refresh-token")
     user_token_curl.set_defaults(func=cmd_user_token_curl)
 
-    classify = subparsers.add_parser("classify-error", help="Bucket a Feishu auth or scope failure.")
+    classify = subparsers.add_parser("classify-error", help="Bucket a GFeishu auth or scope failure.")
     classify.add_argument("--text", required=True)
     classify.set_defaults(func=cmd_classify_error)
 

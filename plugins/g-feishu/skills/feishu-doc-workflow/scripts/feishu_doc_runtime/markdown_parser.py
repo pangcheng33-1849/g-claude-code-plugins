@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Parse markdown text into Feishu descendant blocks."""
+"""Parse markdown text into GFeishu descendant blocks."""
 
 import json
 import re
@@ -274,7 +274,7 @@ def parse_markdown_to_descendants(markdown: str) -> tuple[list[str], list[dict[s
                 )
             )
             if seed_kind == "mermaid" and descendants:
-                descendants[-1]["_codex_whiteboard_seed_kind"] = "mermaid"
+                descendants[-1]["_g_feishu_whiteboard_seed_kind"] = "mermaid"
             index += 1
             continue
 

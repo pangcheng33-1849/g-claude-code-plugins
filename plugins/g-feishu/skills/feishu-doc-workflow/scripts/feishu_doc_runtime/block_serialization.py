@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Convert Feishu block trees back into markdown-like text."""
+"""Convert GFeishu block trees back into markdown-like text."""
 
 from .common import CODE_LANGUAGE_MAP
 
@@ -138,7 +138,7 @@ def block_to_markdown(block: dict[str, object], block_by_id: dict[str, dict[str,
             raw_token = file_node.get("file_token") or file_node.get("token")
             if isinstance(raw_token, str):
                 token = raw_token
-        title = str(block.get("_codex_file_title") or "").strip()
+        title = str(block.get("_g_feishu_file_title") or "").strip()
         attrs: list[str] = [f'view-type="{view_type}"']
         if title:
             attrs.append(f'title="{title}"')

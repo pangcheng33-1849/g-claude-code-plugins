@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Primitive Feishu block builders used by markdown parsing and rewrite flows."""
+"""Primitive GFeishu block builders used by markdown parsing and rewrite flows."""
 
 import uuid
 
@@ -146,17 +146,17 @@ def make_board_block(
         },
     }
     if seed_text:
-        board_block["_codex_whiteboard_seed_text"] = seed_text
-        board_block["_codex_whiteboard_seed_kind"] = "text"
+        board_block["_g_feishu_whiteboard_seed_text"] = seed_text
+        board_block["_g_feishu_whiteboard_seed_kind"] = "text"
     if plantuml_code:
-        board_block["_codex_whiteboard_seed_kind"] = "plantuml"
-        board_block["_codex_whiteboard_plantuml_code"] = plantuml_code
+        board_block["_g_feishu_whiteboard_seed_kind"] = "plantuml"
+        board_block["_g_feishu_whiteboard_plantuml_code"] = plantuml_code
         if isinstance(syntax_type, int):
-            board_block["_codex_whiteboard_plantuml_syntax_type"] = syntax_type
+            board_block["_g_feishu_whiteboard_plantuml_syntax_type"] = syntax_type
         if isinstance(style_type, int):
-            board_block["_codex_whiteboard_plantuml_style_type"] = style_type
+            board_block["_g_feishu_whiteboard_plantuml_style_type"] = style_type
         if isinstance(diagram_type, int):
-            board_block["_codex_whiteboard_plantuml_diagram_type"] = diagram_type
+            board_block["_g_feishu_whiteboard_plantuml_diagram_type"] = diagram_type
     return board_block
 
 
@@ -174,9 +174,9 @@ def make_file_block(
             "view_type": 1 if view_type == 1 else 2,
         },
     }
-    block["_codex_file_source"] = source
+    block["_g_feishu_file_source"] = source
     if title:
-        block["_codex_file_title"] = title
+        block["_g_feishu_file_title"] = title
     return block
 
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Thin wrappers around core Feishu doc/wiki HTTP APIs."""
+"""Thin wrappers around core GFeishu doc/wiki HTTP APIs."""
 
 import json
 import os
@@ -29,7 +29,7 @@ def resolve_bearer_token(
         if not isinstance(bearer_token, str) or not bearer_token:
             raise SystemExit(
                 "missing tenant token: pass --tenant-access-token or set MY_LARK_TENANT_ACCESS_TOKEN. "
-                "If you need to obtain a tenant token, use feishu-auth-and-scopes first."
+                "If you need to obtain a tenant token, use g-feishu-auth-and-scopes first."
             )
         auth_mode = "explicit_tenant_access_token" if tenant_access_token else "environment_MY_LARK_TENANT_ACCESS_TOKEN"
         return bearer_token, auth_mode
@@ -38,7 +38,7 @@ def resolve_bearer_token(
     if not isinstance(bearer_token, str) or not bearer_token:
         raise SystemExit(
             "missing user token: pass --user-access-token or set MY_LARK_USER_ACCESS_TOKEN. "
-            "If you need to obtain or refresh a user token, use feishu-auth-and-scopes first."
+            "If you need to obtain or refresh a user token, use g-feishu-auth-and-scopes first."
         )
     auth_mode = "explicit_user_access_token" if user_access_token else "environment_MY_LARK_USER_ACCESS_TOKEN"
     return bearer_token, auth_mode
@@ -368,7 +368,7 @@ def create_descendants(
             return {
                 key: sanitize(item)
                 for key, item in value.items()
-                if not str(key).startswith("_codex_")
+                if not str(key).startswith("_g_feishu_")
             }
         if isinstance(value, list):
             return [sanitize(item) for item in value]

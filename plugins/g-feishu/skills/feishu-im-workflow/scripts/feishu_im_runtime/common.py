@@ -1,4 +1,4 @@
-"""Shared helpers for Feishu IM API commands.
+"""Shared helpers for GFeishu IM API commands.
 
 This module holds token resolution, HTTP requests, and message payload helpers
 used by multiple IM command groups. Keeping them here lets the entry script stay
@@ -134,7 +134,7 @@ def resolve_token(
     fail(
         f"{command_name} requires a tenant token. Pass --tenant-access-token, "
         "or set MY_LARK_TENANT_ACCESS_TOKEN. "
-        "Use Agent Skill feishu-auth-and-scopes to obtain or refresh a tenant token first."
+        "Use Agent Skill g-feishu-auth-and-scopes to obtain or refresh a tenant token first."
     )
 
 
@@ -231,7 +231,7 @@ def build_message_payload(args: argparse.Namespace) -> tuple[str, str]:
 
 
 def maybe_uuid(value: str | None) -> str:
-    return value or f"codex-im-{uuid.uuid4()}"
+    return value or f"g-feishu-im-{uuid.uuid4()}"
 
 
 def find_message_in_chat(*, token: str, chat_id: str, message_id: str, auth_mode: str) -> dict[str, object]:

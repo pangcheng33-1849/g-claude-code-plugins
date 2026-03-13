@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-"""CLI entrypoint and parser wiring for the Feishu IM workflow helper."""
+"""CLI entrypoint and parser wiring for the GFeishu IM workflow helper."""
 
 import argparse
 from feishu_im_runtime.chat_ops import (
@@ -33,7 +33,7 @@ from feishu_im_runtime.thread_ops import cmd_get_thread
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Standalone Feishu IM helper. Supports real chat creation, message CRUD, "
+            "Standalone GFeishu IM helper. Supports real chat creation, message CRUD, "
             "thread/topic reads, reactions, and chat member operations."
         )
     )
@@ -64,7 +64,7 @@ def build_parser() -> argparse.ArgumentParser:
     create_chat.add_argument("--avatar", help="Optional chat avatar key.")
     create_chat.add_argument("--user-id-type", default="open_id", choices=["open_id", "user_id", "union_id"])
     create_chat.add_argument("--set-bot-manager", action="store_true", help="Set the bot as a group manager when supported.")
-    create_chat.add_argument("--uuid", help="Optional idempotency key. Defaults to a generated codex-im UUID.")
+    create_chat.add_argument("--uuid", help="Optional idempotency key. Defaults to a generated g-feishu-im UUID.")
     add_token_args(create_chat)
     create_chat.set_defaults(func=cmd_create_chat)
 

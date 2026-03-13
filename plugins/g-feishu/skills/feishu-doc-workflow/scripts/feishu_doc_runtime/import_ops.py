@@ -41,7 +41,7 @@ def encode_multipart_payload(
     file_bytes: bytes,
     file_content_type: str,
 ) -> tuple[bytes, str]:
-    boundary = f"----CodexBoundary{uuid.uuid4().hex}"
+    boundary = f"----GFeishuBoundary{uuid.uuid4().hex}"
     chunks: list[bytes] = []
     for name, value in fields.items():
         chunks.extend(

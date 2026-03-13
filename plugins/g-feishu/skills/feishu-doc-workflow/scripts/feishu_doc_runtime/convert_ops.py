@@ -143,8 +143,8 @@ def seed_created_files(
     temp_seed_map: dict[str, dict[str, object]] = {}
     for block in descendants:
         block_id = block.get("block_id")
-        source = block.get("_codex_file_source")
-        title = block.get("_codex_file_title")
+        source = block.get("_g_feishu_file_source")
+        title = block.get("_g_feishu_file_title")
         if isinstance(block_id, str) and isinstance(source, str) and source.strip():
             temp_seed_map[block_id] = {
                 "source": source.strip(),
