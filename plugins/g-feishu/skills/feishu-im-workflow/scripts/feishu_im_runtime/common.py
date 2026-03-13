@@ -1,4 +1,4 @@
-"""Shared helpers for GFeishu IM API commands.
+"""Shared helpers for Feishu IM API commands.
 
 This module holds token resolution, HTTP requests, and message payload helpers
 used by multiple IM command groups. Keeping them here lets the entry script stay

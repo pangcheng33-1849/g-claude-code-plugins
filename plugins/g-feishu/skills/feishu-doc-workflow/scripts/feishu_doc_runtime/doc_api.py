@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Thin wrappers around core GFeishu doc/wiki HTTP APIs."""
+"""Thin wrappers around core Feishu doc/wiki HTTP APIs."""
 
 import json
 import os

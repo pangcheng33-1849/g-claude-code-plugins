@@ -278,7 +278,7 @@ def resolve_user_open_id_by_query(query: str, *, bearer_token: str | None = None
             break
 
     if not matches_by_open_id:
-        raise SystemExit(f"No GFeishu user found for query: {trimmed}")
+        raise SystemExit(f"No Feishu user found for query: {trimmed}")
 
     exact_matches = []
     needle = normalize(trimmed)
@@ -304,7 +304,7 @@ def resolve_user_open_id_by_query(query: str, *, bearer_token: str | None = None
             for user in candidate_users[:5]
         ]
         raise SystemExit(
-            "Multiple GFeishu users matched the query. Refine the name/email or pass an explicit open_id. "
+            "Multiple Feishu users matched the query. Refine the name/email or pass an explicit open_id. "
             f"Candidates: {summary}"
         )
 

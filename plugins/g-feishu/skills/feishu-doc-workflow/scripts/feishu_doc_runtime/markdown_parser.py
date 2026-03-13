@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Parse markdown text into GFeishu descendant blocks."""
+"""Parse markdown text into Feishu descendant blocks."""
 
 import json
 import re

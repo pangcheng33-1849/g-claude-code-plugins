@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Primitive GFeishu block builders used by markdown parsing and rewrite flows."""
+"""Primitive Feishu block builders used by markdown parsing and rewrite flows."""
 
 import uuid
 

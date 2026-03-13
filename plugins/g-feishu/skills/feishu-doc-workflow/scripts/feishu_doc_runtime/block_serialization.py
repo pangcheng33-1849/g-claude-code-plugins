@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Convert GFeishu block trees back into markdown-like text."""
+"""Convert Feishu block trees back into markdown-like text."""
 
 from .common import CODE_LANGUAGE_MAP
 

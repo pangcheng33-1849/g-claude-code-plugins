@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-"""CLI entrypoint and parser wiring for the GFeishu IM workflow helper."""
+"""CLI entrypoint and parser wiring for the Feishu IM workflow helper."""
 
 import argparse
 from feishu_im_runtime.chat_ops import (
@@ -33,7 +33,7 @@ from feishu_im_runtime.thread_ops import cmd_get_thread
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Standalone GFeishu IM helper. Supports real chat creation, message CRUD, "
+            "Standalone Feishu IM helper. Supports real chat creation, message CRUD, "
             "thread/topic reads, reactions, and chat member operations."
         )
     )
