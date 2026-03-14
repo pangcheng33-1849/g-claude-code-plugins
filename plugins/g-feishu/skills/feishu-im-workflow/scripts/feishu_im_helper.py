@@ -15,6 +15,10 @@ from feishu_im_runtime.common import (
     add_message_content_args,
     add_token_args,
 )
+from feishu_im_runtime.media_ops import (
+    cmd_upload_file,
+    cmd_upload_image,
+)
 from feishu_im_runtime.message_ops import (
     cmd_edit_message,
     cmd_recall_message,
@@ -215,6 +219,72 @@ def build_parser() -> argparse.ArgumentParser:
         help="List a built-in reaction emoji reference set, with lively positive emoji_types first.",
     )
     list_emojis.set_defaults(func=cmd_list_reaction_emojis)
+
+    upload_image = subparsers.add_parser(
+        "upload-image",
+        help=(
+            "Upload a local image to Feishu and get an image_key. "
+            "Supports JPG, JPEG, PNG, WEBP, GIF, BMP, ICO, TIFF, HEIC. Max 10 MB. "
+            "Use the returned image_key with send-message --msg-type image."
+        ),
+        description=(
+            "Upload a local image file to Feishu open platform via multipart/form-data. "
+            "Returns image_key for use in send-message --msg-type image. "
+            "Required scope: im:resource or im:resource:upload."
+        ),
+    )
+    upload_image.add_argument(
+        "--file-path",
+        required=True,
+        help="Local path to the image file.",
+    )
+    upload_image.add_argument(
+        "--image-type",
+        default="message",
+        choices=["message", "avatar"],
+        help='Image usage type. "message" for sending in chat (default), "avatar" for profile pictures.',
+    )
+    add_token_args(upload_image)
+    upload_image.set_defaults(func=cmd_upload_image)
+
+    upload_file = subparsers.add_parser(
+        "upload-file",
+        help=(
+            "Upload a local file to Feishu and get a file_key. "
+            "Supports opus, mp4, pdf, doc, xls, ppt, stream. Max 30 MB. "
+            "Use the returned file_key with send-message --msg-type file."
+        ),
+        description=(
+            "Upload a local file to Feishu open platform via multipart/form-data. "
+            "Returns file_key for use in send-message --msg-type file. "
+            "Required scope: im:resource or im:resource:upload."
+        ),
+    )
+    upload_file.add_argument(
+        "--file-path",
+        required=True,
+        help="Local path to the file.",
+    )
+    upload_file.add_argument(
+        "--file-type",
+        required=True,
+        choices=["opus", "mp4", "pdf", "doc", "xls", "ppt", "stream"],
+        help=(
+            "File type. Use 'stream' for generic files not matching other types. "
+            "Audio must be converted to opus format before uploading."
+        ),
+    )
+    upload_file.add_argument(
+        "--file-name",
+        help="Display filename with extension. Defaults to the local filename.",
+    )
+    upload_file.add_argument(
+        "--duration",
+        type=int,
+        help="Duration in milliseconds for audio/video files. Omitting this hides the duration display.",
+    )
+    add_token_args(upload_file)
+    upload_file.set_defaults(func=cmd_upload_file)
 
     return parser
 

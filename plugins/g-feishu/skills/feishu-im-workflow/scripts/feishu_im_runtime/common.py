@@ -223,11 +223,28 @@ def print_result_or_exit(result: dict[str, object], *, command_name: str) -> Non
 
 
 def build_message_payload(args: argparse.Namespace) -> tuple[str, str]:
+    # Convenience shortcut: --text
     if args.text is not None:
         return "text", json.dumps({"text": args.text}, ensure_ascii=False)
+
+    # Convenience shortcut: --image-key → msg_type=image
+    image_key = getattr(args, "image_key", None)
+    if image_key is not None:
+        return "image", json.dumps({"image_key": image_key}, ensure_ascii=False)
+
+    # Convenience shortcut: --file-key → msg_type determined by --msg-type
+    file_key = getattr(args, "file_key", None)
+    if file_key is not None:
+        msg_type = args.msg_type if args.msg_type != "text" else "file"
+        media_image_key = getattr(args, "media_image_key", None)
+        content: dict[str, str] = {"file_key": file_key}
+        if media_image_key:
+            content["image_key"] = media_image_key
+        return msg_type, json.dumps(content, ensure_ascii=False)
+
     msg_type = args.msg_type
-    content = load_content_json(args.content_json, args.content_file)
-    return msg_type, json.dumps(content, ensure_ascii=False)
+    content_obj = load_content_json(args.content_json, args.content_file)
+    return msg_type, json.dumps(content_obj, ensure_ascii=False)
 
 
 def maybe_uuid(value: str | None) -> str:
@@ -269,9 +286,39 @@ def add_token_args(parser: argparse.ArgumentParser) -> None:
 def add_message_content_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--text", help="Convenience shortcut for text messages.")
     parser.add_argument(
+        "--image-key",
+        help=(
+            "Convenience shortcut: send an image message using an image_key obtained from upload-image. "
+            "Automatically sets msg_type=image. Mutually exclusive with --text, --file-key, --content-json/file."
+        ),
+    )
+    parser.add_argument(
+        "--file-key",
+        help=(
+            "Convenience shortcut: send a file/audio/media/sticker message using a file_key from upload-file. "
+            "Pair with --msg-type to select the exact type: "
+            "file (pdf/doc/xls/ppt/stream), audio (opus), media (mp4), sticker. "
+            "Defaults to msg_type=file when --msg-type is not set. "
+            "Mutually exclusive with --text, --image-key, --content-json/file."
+        ),
+    )
+    parser.add_argument(
+        "--media-image-key",
+        help=(
+            "Optional thumbnail image_key for media (video) messages. "
+            "Only used together with --file-key and --msg-type media."
+        ),
+    )
+    parser.add_argument(
         "--msg-type",
         default="text",
-        help="Message type for non-text messages. Common choices: text, post, interactive. For non-casual or formal long messages, prefer interactive first; use post only when card layout is unnecessary. Defaults to text.",
+        help=(
+            "Message type. "
+            "Shortcuts: use --text for text, --image-key for image, --file-key for file/audio/media/sticker. "
+            "For explicit control: text, post, interactive, image, file, audio, media, sticker, share_chat, share_user. "
+            "For non-casual or formal long messages prefer interactive; use post only when card layout is unnecessary. "
+            "Defaults to text."
+        ),
     )
     parser.add_argument(
         "--content-json",
