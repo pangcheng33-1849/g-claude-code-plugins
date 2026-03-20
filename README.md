@@ -27,6 +27,9 @@ Or via local path (for development):
 If you only want a single skill instead of the whole plugin, you can also use the Agent Skills CLI:
 
 ```bash
+# Interactive add flow
+npx skills add pangcheng1849/g-claude-code-plugins
+
 # Install only the xhs-research skill
 npx skills add pangcheng1849/g-claude-code-plugins --skill xhs-research
 
