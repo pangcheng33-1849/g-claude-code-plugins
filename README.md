@@ -22,6 +22,18 @@ Or via local path (for development):
 /plugin install xhs-research@g-claude-code-plugins
 ```
 
+### Install only one skill
+
+If you only want a single skill instead of the whole plugin, you can also use the Agent Skills CLI:
+
+```bash
+# Install only the xhs-research skill
+npx skills add pangcheng1849/g-claude-code-plugins --skill xhs-research
+
+# Install only the xhs-research skill into Claude Code
+npx skills add pangcheng1849/g-claude-code-plugins --skill xhs-research -a claude-code
+```
+
 ## Available Plugins
 
 | Plugin | Description | Version |
