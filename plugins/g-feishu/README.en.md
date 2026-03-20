@@ -6,7 +6,7 @@ A collection of distributable Feishu/Lark Agent Skills for Claude Code.
 
 ```bash
 # Step 1: Add the marketplace
-/plugin marketplace add pangcheng33-1849/g-claude-code-plugins
+/plugin marketplace add pangcheng1849/g-claude-code-plugins
 
 # Step 2: Install the plugin
 /plugin install g-feishu@g-claude-code-plugins

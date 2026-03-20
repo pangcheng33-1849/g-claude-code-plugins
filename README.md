@@ -7,7 +7,7 @@ A Claude Code plugins marketplace.
 ### Add this marketplace
 
 ```bash
-/plugin marketplace add pangcheng33-1849/g-claude-code-plugins
+/plugin marketplace add pangcheng1849/g-claude-code-plugins
 ```
 
 Or via local path (for development):

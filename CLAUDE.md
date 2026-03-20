@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A Claude Code **plugin marketplace**. It hosts plugins that users install into Claude Code via:
 
 ```bash
-/plugin marketplace add pangcheng33-1849/g-claude-code-plugins
+/plugin marketplace add pangcheng1849/g-claude-code-plugins
 /plugin install g-feishu@g-claude-code-plugins
 ```
 
