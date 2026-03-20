@@ -29,15 +29,15 @@ claude --plugin-dir ./plugins/xhs-research
 - 必需：Playwright MCP Bridge 浏览器扩展，并通过 `--extension` 连接用户真实浏览器
 - 推荐：用户浏览器中已登录小红书账号
 
-## 可选协作插件
+## 可选协作 Skills
 
-如果还安装了 `g-feishu@g-claude-code-plugins`，`xhs-research` 会在可用时调用以下 skills：
+如果当前环境里已经有以下飞书 skills，`xhs-research` 会在可用时调用它们：
 
 - `feishu-auth-and-scopes`
 - `feishu-doc-workflow`
 - `feishu-im-workflow`
 
-这些飞书能力仅用于登录提醒、结果汇总成飞书文档和消息推送；未安装 `g-feishu` 时，插件仍应完整生成本地 Markdown 结果。
+这些飞书能力仅用于登录提醒、结果汇总成飞书文档和消息推送；即使这些 skills 不可用，插件仍应完整生成本地 Markdown 结果。
 
 ## 输出
 
