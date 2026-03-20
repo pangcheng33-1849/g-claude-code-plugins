@@ -2,6 +2,11 @@
 
 A Claude Code plugins marketplace.
 
+This repository can be used in two ways:
+
+- Install full plugins with `/plugin install`
+- Install raw skills directly with `npx skills`
+
 ## Usage
 
 ### Add this marketplace
@@ -35,6 +40,28 @@ npx skills add pangcheng1849/g-claude-code-plugins --skill xhs-research
 
 # Install only the xhs-research skill into Claude Code
 npx skills add pangcheng1849/g-claude-code-plugins --skill xhs-research -a claude-code
+```
+
+Use `/plugin install` when you want the full plugin package, including plugin metadata and any bundled agents or hooks.
+
+### Install skills with `npx skills`
+
+If you only want the raw `SKILL.md` content, you can install skills directly with `npx skills`.
+
+Recommended: use the repository URL directly with `npx skills add` for interactive installation. The CLI will discover nested skills in this repo and let you choose what to install.
+
+```bash
+# Recommended: interactive installation
+npx skills add https://github.com/pangcheng1849/g-claude-code-plugins
+
+# Install one skill to Codex
+npx skills add https://github.com/pangcheng1849/g-claude-code-plugins -a codex -s feishu-doc-workflow
+
+# Install all repository skills to Claude Code
+npx skills add https://github.com/pangcheng1849/g-claude-code-plugins -a claude-code -s '*'
+
+# List available skills without installing
+npx skills add https://github.com/pangcheng1849/g-claude-code-plugins --list
 ```
 
 ## Available Plugins
