@@ -31,6 +31,17 @@
       },
       "category": "productivity",
       "tags": ["feishu", "lark"]
+    },
+    {
+      "name": "xhs-research",
+      "source": "./plugins/xhs-research",
+      "description": "Xiaohongshu reputation research workflow for Claude Code",
+      "version": "1.0.0",
+      "author": {
+        "name": "cheng-pang"
+      },
+      "category": "research",
+      "tags": ["xiaohongshu", "research", "social-listening"]
     }
   ]
 }

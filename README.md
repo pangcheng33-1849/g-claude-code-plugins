@@ -19,7 +19,7 @@ Or via local path (for development):
 ### Install a plugin
 
 ```bash
-/plugin install example-plugin@g-claude-code-plugins
+/plugin install xhs-research@g-claude-code-plugins
 ```
 
 ## Available Plugins
@@ -27,6 +27,8 @@ Or via local path (for development):
 | Plugin | Description | Version |
 |--------|-------------|---------|
 | [example-plugin](./plugins/example-plugin) | An example plugin with skill, agent, and hook | 1.0.0 |
+| [g-feishu](./plugins/g-feishu) | Feishu (Lark) integration skills for Claude Code | 1.3.0 |
+| [xhs-research](./plugins/xhs-research) | Xiaohongshu reputation research workflow for Claude Code | 1.0.0 |
 
 ## Plugin Structure
 
