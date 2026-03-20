@@ -27,7 +27,16 @@ claude --plugin-dir ./plugins/xhs-research
 
 - 必需：`playwright-cli`
 - 必需：Playwright MCP Bridge 浏览器扩展，并通过 `--extension` 连接用户真实浏览器
+- 必需：将扩展状态页里显示的 token 配置到环境变量 `PLAYWRIGHT_MCP_EXTENSION_TOKEN`
 - 推荐：用户浏览器中已登录小红书账号
+
+推荐先在当前 shell 中导出：
+
+```bash
+export PLAYWRIGHT_MCP_EXTENSION_TOKEN="your-token-here"
+```
+
+这个 token 可以在 Playwright MCP Bridge 扩展图标或状态页中复制到；配置后可避免每次连接浏览器时手动确认。
 
 ## 可选协作 Skills
 
