@@ -12,6 +12,16 @@
 /plugin install xhs-research@g-claude-code-plugins
 ```
 
+如果你只想安装这个 skill，而不是整个 plugin，也可以使用 `npx skills add`：
+
+```bash
+# 只安装 xhs-research skill
+npx skills add pangcheng1849/g-claude-code-plugins --skill xhs-research
+
+# 指定安装到 Claude Code
+npx skills add pangcheng1849/g-claude-code-plugins --skill xhs-research -a claude-code
+```
+
 本地开发调试：
 
 ```bash
