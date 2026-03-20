@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A Claude Code **plugin marketplace**. It hosts plugins that users install into Claude Code via:
 
 ```bash
-/plugin marketplace add pangcheng33-1849/g-claude-code-plugins
+/plugin marketplace add pangcheng1849/g-claude-code-plugins
 /plugin install g-feishu@g-claude-code-plugins
 ```
 
@@ -44,7 +44,7 @@ Version is stored in two places — both must be updated together when bumping:
 - `plugins/<name>/.claude-plugin/plugin.json` → `"version"`
 - `.claude-plugin/marketplace.json` → the matching plugin entry's `"version"`
 
-Current versions: `g-feishu` = 1.3.0, `example-plugin` = 1.0.0.
+Current versions: `g-feishu` = 1.3.0, `example-plugin` = 1.0.0, `xhs-research` = 1.0.0.
 
 ## g-feishu Plugin Architecture
 

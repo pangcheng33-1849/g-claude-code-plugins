@@ -1,0 +1,11 @@
+{
+  "name": "xhs-research",
+  "description": "Xiaohongshu reputation research workflow for Claude Code",
+  "version": "1.0.0",
+  "author": {
+    "name": "cheng-pang"
+  },
+  "license": "MIT",
+  "keywords": ["xiaohongshu", "research", "social-listening"],
+  "skills": "./skills"
+}
