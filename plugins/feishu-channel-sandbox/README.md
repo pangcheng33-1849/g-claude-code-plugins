@@ -30,10 +30,10 @@
 
 拦截 **Read**、**Write**、**Edit** 工具调用：
 
-1. 提取 `file_path`，展开 `~` 并通过 `realpath -m` 规范化（解析 `../` 和符号链接）
+1. 提取 `file_path`，展开 `~` 并规范化（解析 `../` 和符号链接，macOS 兼容）
 2. 自动放行 Claude 工作目录（`cwd`）及其子目录
 3. 对比 `sandbox.conf` 白名单（路径同样规范化后前缀匹配）
-4. 不在白名单内则阻止（exit 2）
+4. 不在白名单内则阻止（exit 2），并提示读取配置文件查看允许范围
 5. 配置文件缺失时阻止所有文件操作
 6. 所有 ALLOW/BLOCK 操作写入会话日志
 
@@ -61,7 +61,7 @@
 
 这防止了通过 `cat ~/secret.txt`、`ls ~/Downloads/`、`echo x > ~/private/file` 等方式绕过文件访问控制。`/dev/*` 路径始终放行（如 `/dev/null`）。
 
-所有 ALLOW/BLOCK 操作写入会话日志。
+所有 ALLOW/BLOCK 操作写入会话日志。被拦截时会提示 Claude 读取对应配置文件查看允许范围，便于自我纠正。
 
 ## 日志
 
@@ -87,7 +87,12 @@ grep 'sandbox-' ~/.claude/channels/feishu/logs/latest
 
 ## 配置
 
-首次启动会话时自动创建配置文件（SessionStart hook）。
+首次启动会话时 setup.sh（SessionStart hook）自动完成初始化：
+
+1. 将插件内的预设 profiles 同步到 `~/.claude/channels/feishu/profiles/`
+2. 创建软链接 `sandbox.conf` → `profiles/default-sandbox.conf`、`sandbox-bash.conf` → `profiles/default-bash.conf`
+
+活跃配置是指向 profiles 目录下对应文件的**软链接**，切换配置集只需改变链接指向，即时生效。
 
 ### `~/.claude/channels/feishu/sandbox.conf` — 文件路径白名单
 
@@ -104,7 +109,7 @@ grep 'sandbox-' ~/.claude/channels/feishu/logs/latest
 
 ### `~/.claude/channels/feishu/sandbox-bash.conf` — 命令白名单
 
-默认允许只读类命令：
+默认（default profile）允许只读类命令：
 
 | 类型 | 默认允许的命令前缀 |
 |------|------|
@@ -116,17 +121,23 @@ grep 'sandbox-' ~/.claude/channels/feishu/logs/latest
 | Git 只读 | `git status`, `git log`, `git diff`, `git show`, `git branch` |
 | 版本查询 | `node --version`, `python3 --version`, `bun --version` |
 | 包信息 | `npm list`, `npm info`, `pip list`, `pip show` |
+| 配置集管理 | `ln -sf ~/.claude/channels/feishu/...`, `readlink`, `cp ~/.claude/channels/feishu/profiles/...`, `rm ~/.claude/channels/feishu/profiles/...` |
 
-所有命令都受第 2 层路径检查约束，只能操作白名单路径内的文件。需要更多命令时编辑 `sandbox-bash.conf` 添加对应前缀，或切换到 dev 配置集。
+所有命令都受路径检查约束，只能操作白名单路径内的文件。需要更多命令时可创建自定义配置集。
 
 ## 配置集（Profiles）
 
-提供两个预设配置集，通过 skill 一键切换：
+提供 `default` 和 `dev` 两个预设配置集，同时支持创建自定义配置集。通过 skill 管理：
 
-```
-/feishu-channel-sandbox-profile          # 查看当前配置集
-/feishu-channel-sandbox-profile dev      # 切换到开发模式
-/feishu-channel-sandbox-profile default  # 恢复只读模式
+```bash
+/feishu-channel-sandbox-profile help              # 查看所有子命令
+/feishu-channel-sandbox-profile                    # 查看当前配置集及可用列表
+/feishu-channel-sandbox-profile dev                # 切换到开发模式
+/feishu-channel-sandbox-profile default            # 恢复只读模式
+/feishu-channel-sandbox-profile show [name]        # 查看配置集详细内容
+/feishu-channel-sandbox-profile create <name> [base]  # 基于已有配置集创建自定义版本
+/feishu-channel-sandbox-profile edit <name>        # 编辑自定义配置集
+/feishu-channel-sandbox-profile delete <name>      # 删除自定义配置集
 ```
 
 ### default — 只读模式（默认）
@@ -154,7 +165,20 @@ dev 模式同时扩展路径白名单：新增 `/usr/local`、`~/.npm`、`~/.bun
 
 **所有命令仍受路径白名单约束**，只能操作项目目录和已授权路径。
 
-配置集文件也存放在插件的 `profiles/` 目录下供参考。
+### 自定义配置集
+
+可基于任意已有配置集创建自定义版本：
+
+```bash
+# 基于 dev 创建一个前端专用配置集
+/feishu-channel-sandbox-profile create frontend dev
+# 编辑：按需增删命令和路径
+/feishu-channel-sandbox-profile edit frontend
+# 切换使用
+/feishu-channel-sandbox-profile frontend
+```
+
+自定义配置集存放在 `~/.claude/channels/feishu/profiles/`，由 `{name}-bash.conf` 和 `{name}-sandbox.conf` 两个文件组成。预设配置集（default、dev）不可编辑和删除。
 
 ## 禁用
 

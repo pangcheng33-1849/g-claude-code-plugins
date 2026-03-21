@@ -17,7 +17,7 @@ bash tests/test-sandbox.sh
 2. **DEFAULT profile 行为测试** — 验证只读命令放行、写入命令阻止
 3. **DEV profile 行为测试** — 验证开发命令放行、安全机制仍生效
 
-通过 `switch_profile default/dev` 切换配置集（从 `profiles/` 目录复制配置文件）。
+通过 `switch_profile default/dev` 切换配置集（从 `skills/sandbox-profile/profiles/` 目录复制配置文件）。
 
 ## 添加测试用例
 

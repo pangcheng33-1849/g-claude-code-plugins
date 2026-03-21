@@ -3,107 +3,59 @@
 # setup.sh — 沙盒初始化
 # =============================================================================
 #
-# 作为 SessionStart hook 运行，在会话启动时创建默认配置文件。
-# 仅在配置文件不存在时创建，已有的配置不会被覆盖。
+# 作为 SessionStart hook 运行：
+#   1. 同步 profiles 到运行时目录（每次会话）
+#   2. 创建默认配置软链接（仅首次）
 #
-# 创建两个配置文件：
-#   1. sandbox.conf      — 文件路径白名单（供 sandbox-file.sh 使用）
-#   2. sandbox-bash.conf — 命令前缀白名单（供 sandbox-bash.sh 使用）
-#
-# 配置文件位置：~/.claude/channels/feishu/
-# 用户可随时编辑这些文件来自定义沙盒规则。
+# 活跃配置（sandbox.conf、sandbox-bash.conf）是指向 profiles/ 下对应文件的软链接。
+# 切换配置集只需改变软链接指向，查询当前配置集只需检查链接目标。
 # =============================================================================
 
 # 确保配置目录存在
 CONF_DIR="$HOME/.claude/channels/feishu"
 mkdir -p "$CONF_DIR"
 
-# -------------------------------------------------------------------------
-# 文件路径白名单
-# -------------------------------------------------------------------------
-# sandbox-file.sh 会读取此文件，决定哪些路径允许 Read/Write/Edit。
-# 注意：Claude 的工作目录（cwd）会被 sandbox-file.sh 自动放行，无需在此列出。
-# 这里只需配置额外需要访问的路径。
-FILE_CONF="$CONF_DIR/sandbox.conf"
-if [ ! -f "$FILE_CONF" ]; then
-  cat > "$FILE_CONF" << 'DEFAULTS'
-# feishu-channel-sandbox: allowed file paths (one per line)
-# Lines starting with # are comments. Paths are prefix-matched after canonicalization.
-# Claude's working directory (cwd) is always allowed automatically.
-# Edit this file to customize. Remove feishu-channel-sandbox plugin to disable.
+# 定位 profiles 目录（skill 目录下）
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_DIR="$(dirname "$SCRIPT_DIR")"
+PROFILES_SRC="$PLUGIN_DIR/skills/sandbox-profile/profiles"
 
-# Feishu channel state
-~/.claude/channels/feishu
-
-# Temp files
-/tmp
-DEFAULTS
+# -------------------------------------------------------------------------
+# 同步预设 profiles 到运行时目录
+# -------------------------------------------------------------------------
+# sandbox hook 会拦截从插件缓存目录读取文件，因此 skill 无法直接读取插件内的 profiles。
+# 将 profiles 复制到 ~/.claude/channels/feishu/profiles/（在沙盒白名单内），
+# 每次会话启动都同步，确保插件更新后配置跟进。
+# 如果用户手动修改过预设 profile，先备份再覆盖。
+PROFILES_DST="$CONF_DIR/profiles"
+if [ -d "$PROFILES_SRC" ]; then
+  mkdir -p "$PROFILES_DST"
+  for src_file in "$PROFILES_SRC"/*.conf; do
+    [ ! -f "$src_file" ] && continue
+    filename=$(basename "$src_file")
+    dst_file="$PROFILES_DST/$filename"
+    if [ -f "$dst_file" ]; then
+      if ! diff -q "$src_file" "$dst_file" >/dev/null 2>&1; then
+        backup="${dst_file%.conf}.$(date +%Y%m%d%H%M%S).bak"
+        cp "$dst_file" "$backup"
+        echo "feishu-sandbox: preset profile $filename was modified locally, backed up to $(basename "$backup")" >&2
+      fi
+    fi
+    cp "$src_file" "$dst_file"
+  done
 fi
 
 # -------------------------------------------------------------------------
-# 命令前缀白名单
+# 初始化活跃配置（仅首次，已有配置不覆盖）
 # -------------------------------------------------------------------------
-# sandbox-bash.sh 会读取此文件，决定哪些 Bash 命令允许执行。
-# 匹配规则：命令必须以配置中某行的内容为前缀。
-# 例如 "git status" 允许 "git status --short"，但不允许 "git push"。
-# 如果只写 "git"，则允许所有 git 子命令，请谨慎配置。
-#
-# 默认只允许只读/信息类命令，不包含写入或网络操作。
+# 用软链接指向 profiles/ 下的 default 配置。
+# -e 检查链接目标是否存在（断链返回 false），-L 检查是否是软链接。
+FILE_CONF="$CONF_DIR/sandbox.conf"
+if [ ! -e "$FILE_CONF" ] && [ ! -L "$FILE_CONF" ]; then
+  ln -sf "$PROFILES_DST/default-sandbox.conf" "$FILE_CONF"
+fi
+
 BASH_CONF="$CONF_DIR/sandbox-bash.conf"
-if [ ! -f "$BASH_CONF" ]; then
-  cat > "$BASH_CONF" << 'DEFAULTS'
-# feishu-channel-sandbox: allowed bash command prefixes (one per line)
-# Lines starting with # are comments. Commands must start with an allowed prefix.
-# Edit this file to customize. Remove feishu-channel-sandbox plugin to disable.
-
-# Common safe commands
-ls
-cat
-head
-tail
-wc
-echo
-printf
-date
-pwd
-whoami
-which
-file
-stat
-du
-df
-find
-sort
-uniq
-grep
-rg
-ag
-sed
-awk
-cut
-tr
-diff
-jq
-yq
-
-# Version/info commands
-git status
-git log
-git diff
-git show
-git branch
-node --version
-python3 --version
-bun --version
-
-# Package info (read-only)
-npm list
-npm info
-pip list
-pip show
-
-# Process info
-ps
-top -l 1
-DEFAULTS
+if [ ! -e "$BASH_CONF" ] && [ ! -L "$BASH_CONF" ]; then
+  ln -sf "$PROFILES_DST/default-bash.conf" "$BASH_CONF"
 fi

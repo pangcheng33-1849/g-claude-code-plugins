@@ -97,5 +97,5 @@ done < "$CONF"
 
 # 所有检查都未通过，阻止操作并输出详细信息便于排查
 log_sandbox "BLOCK path=$FILE_PATH_CANONICAL (original: $FILE_PATH)"
-echo "feishu-sandbox: blocked $FILE_PATH (resolved: $FILE_PATH_CANONICAL, not in allowed paths, edit $CONF)" >&2
+echo "feishu-sandbox: blocked $FILE_PATH (resolved: $FILE_PATH_CANONICAL, not in allowed paths). Read $CONF to see allowed paths." >&2
 exit 2

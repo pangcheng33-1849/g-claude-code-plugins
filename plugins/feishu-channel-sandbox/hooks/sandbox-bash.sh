@@ -222,7 +222,7 @@ for seg in "${CMD_SEGMENTS[@]}"; do
   if ! is_prefix_allowed "$seg"; then
     TRIMMED=$(echo "$seg" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
     log_sandbox "BLOCK command=${COMMAND:0:120} (segment '${TRIMMED:0:60}' not in allowlist)"
-    echo "feishu-sandbox: blocked command (segment '${TRIMMED:0:60}' not in allowlist, edit $CONF to customize)" >&2
+    echo "feishu-sandbox: blocked command (segment '${TRIMMED:0:60}' not in allowlist). Read $CONF to see allowed command prefixes, read $PATH_CONF to see allowed paths." >&2
     exit 2
   fi
 done
@@ -256,7 +256,7 @@ done <<< "$PATHS"
 if [ -n "$BLOCKED_PATH" ]; then
   RESOLVED=$(canonicalize "$(expand_home "$BLOCKED_PATH")")
   log_sandbox "BLOCK command=${COMMAND:0:120} (path $RESOLVED not allowed)"
-  echo "feishu-sandbox: blocked (path $BLOCKED_PATH not in allowed paths, edit $PATH_CONF)" >&2
+  echo "feishu-sandbox: blocked (path $BLOCKED_PATH not in allowed paths). Read $PATH_CONF to see allowed paths." >&2
   exit 2
 fi
 

@@ -79,11 +79,16 @@ expect_block() {
   fi
 }
 
-# 切换配置集
+# 初始化运行时 profiles（模拟 setup.sh 的同步行为）
+PROFILES_DST="$CONF_DIR/profiles"
+mkdir -p "$PROFILES_DST"
+cp "$SCRIPT_DIR/skills/sandbox-profile/profiles/"*.conf "$PROFILES_DST/"
+
+# 切换配置集（模拟 skill 的 ln -sf 行为）
 switch_profile() {
   local profile="$1"
-  cp "$SCRIPT_DIR/profiles/${profile}-bash.conf" "$CONF_DIR/sandbox-bash.conf"
-  cp "$SCRIPT_DIR/profiles/${profile}-sandbox.conf" "$CONF_DIR/sandbox.conf"
+  ln -sf "$PROFILES_DST/${profile}-bash.conf" "$CONF_DIR/sandbox-bash.conf"
+  ln -sf "$PROFILES_DST/${profile}-sandbox.conf" "$CONF_DIR/sandbox.conf"
 }
 
 # ══════════════════════════════════════════════════════════════════════════
