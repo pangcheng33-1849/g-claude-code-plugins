@@ -36,7 +36,7 @@ export MY_LARK_EMAIL="..."                                    # default identity
 export MY_LARK_WEB_BASE_URL="https://<tenant>.larkoffice.com" # optional, enables doc links
 ```
 
-Internal runtime vars (not set by users): `MY_LARK_TENANT_ACCESS_TOKEN`, `MY_LARK_USER_ACCESS_TOKEN`, `FEISHU_AUTH_CACHE_DIR`, `FEISHU_DOC_TASK_DIR`.
+Token handling: all workflow scripts require explicit `--user-access-token` or `--tenant-access-token`. Use skill `feishu-auth-and-scopes` (`resolve-token`) to obtain tokens — do not rely on environment variables for token passing.
 
 ## Adding a New Skill
 

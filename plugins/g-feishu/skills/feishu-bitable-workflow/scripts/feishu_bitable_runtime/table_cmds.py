@@ -13,7 +13,7 @@ def cmd_create_table(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="create-table",
     )
     table: dict[str, object] = {"name": args.name}
@@ -47,7 +47,7 @@ def cmd_list_tables(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="list-tables",
     )
     response = request_json(
@@ -74,7 +74,7 @@ def cmd_update_table(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="update-table",
     )
     if not args.name:
@@ -102,7 +102,7 @@ def cmd_delete_table(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="delete-table",
     )
     response = request_json(
@@ -127,7 +127,7 @@ def cmd_batch_create_tables(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="batch-create-tables",
     )
     tables = normalize_json_list(load_json_value(args.tables_json, args.tables_file, default=[]), name="tables")
@@ -155,7 +155,7 @@ def cmd_batch_delete_tables(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="batch-delete-tables",
     )
     table_ids = load_string_list(args.table_ids, args.table_ids_json, args.table_ids_file, name="table_ids")

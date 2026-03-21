@@ -41,11 +41,11 @@ Expect:
 
 ## Real Execution Smoke Test
 
-Resolve a user token first:
+Resolve a user token first using skill `feishu-auth-and-scopes`:
 
-```bash
-python3 .agents/skills/feishu-auth-and-scopes/scripts/feishu_auth_helper.py \
-  resolve-token --identity user --print-access-token
+```
+Use skill feishu-auth-and-scopes resolve-token to get a user token,
+then extract access_token from the JSON result.
 ```
 
 Then run:

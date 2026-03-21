@@ -3,7 +3,6 @@ from __future__ import annotations
 """Thin wrappers around core Feishu doc/wiki HTTP APIs."""
 
 import json
-import os
 import urllib.parse
 
 from .common import (
@@ -25,23 +24,19 @@ def resolve_bearer_token(
     use_tenant_token: bool,
 ) -> tuple[str, str]:
     if use_tenant_token or tenant_access_token:
-        bearer_token = tenant_access_token or os.getenv("MY_LARK_TENANT_ACCESS_TOKEN")
-        if not isinstance(bearer_token, str) or not bearer_token:
+        if not isinstance(tenant_access_token, str) or not tenant_access_token:
             raise SystemExit(
-                "missing tenant token: pass --tenant-access-token or set MY_LARK_TENANT_ACCESS_TOKEN. "
-                "If you need to obtain a tenant token, use g-feishu-auth-and-scopes first."
+                "missing tenant token: pass --tenant-access-token. "
+                "Use skill feishu-auth-and-scopes to obtain a tenant token first."
             )
-        auth_mode = "explicit_tenant_access_token" if tenant_access_token else "environment_MY_LARK_TENANT_ACCESS_TOKEN"
-        return bearer_token, auth_mode
+        return tenant_access_token, "explicit_tenant_access_token"
 
-    bearer_token = user_access_token or os.getenv("MY_LARK_USER_ACCESS_TOKEN")
-    if not isinstance(bearer_token, str) or not bearer_token:
+    if not isinstance(user_access_token, str) or not user_access_token:
         raise SystemExit(
-            "missing user token: pass --user-access-token or set MY_LARK_USER_ACCESS_TOKEN. "
-            "If you need to obtain or refresh a user token, use g-feishu-auth-and-scopes first."
+            "missing user token: pass --user-access-token. "
+            "Use skill feishu-auth-and-scopes to obtain a user token first."
         )
-    auth_mode = "explicit_user_access_token" if user_access_token else "environment_MY_LARK_USER_ACCESS_TOKEN"
-    return bearer_token, auth_mode
+    return user_access_token, "explicit_user_access_token"
 
 
 def fetch_raw_content(document_id: str, bearer_token: str) -> dict[str, object]:

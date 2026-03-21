@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import re
 import urllib.error
 import urllib.parse
@@ -16,11 +15,8 @@ def print_json(payload: object) -> None:
 def require_user_token(explicit_token: str | None) -> tuple[str, str]:
     if explicit_token:
         return explicit_token, "explicit_user_access_token"
-    env_token = os.getenv("MY_LARK_USER_ACCESS_TOKEN")
-    if env_token:
-        return env_token, "environment_MY_LARK_USER_ACCESS_TOKEN"
     raise SystemExit(
-        "Missing user token. Pass --user-access-token or set MY_LARK_USER_ACCESS_TOKEN."
+        "Missing user token. Pass --user-access-token (use skill feishu-auth-and-scopes to obtain)."
     )
 
 
@@ -251,7 +247,7 @@ def build_parser() -> argparse.ArgumentParser:
     search_user.add_argument("--query", required=True)
     search_user.add_argument("--offset", type=int, default=0)
     search_user.add_argument("--limit", type=int, default=10)
-    search_user.add_argument("--user-access-token")
+    search_user.add_argument("--user-access-token", required=True, help="Use skill feishu-auth-and-scopes to obtain.")
     search_user.set_defaults(func=cmd_search_user)
 
     search_wiki = subparsers.add_parser(
@@ -264,7 +260,7 @@ def build_parser() -> argparse.ArgumentParser:
     search_wiki.add_argument("--node-id")
     search_wiki.add_argument("--page-size", type=int, default=10)
     search_wiki.add_argument("--page-token")
-    search_wiki.add_argument("--user-access-token")
+    search_wiki.add_argument("--user-access-token", required=True, help="Use skill feishu-auth-and-scopes to obtain.")
     search_wiki.set_defaults(func=cmd_search_wiki)
 
     search_chat = subparsers.add_parser(
@@ -276,7 +272,7 @@ def build_parser() -> argparse.ArgumentParser:
     search_chat.add_argument("--page-size", type=int, default=10)
     search_chat.add_argument("--page-token")
     search_chat.add_argument("--user-id-type", default="open_id")
-    search_chat.add_argument("--user-access-token")
+    search_chat.add_argument("--user-access-token", required=True, help="Use skill feishu-auth-and-scopes to obtain.")
     search_chat.set_defaults(func=cmd_search_chat)
 
     search_doc = subparsers.add_parser(
@@ -287,7 +283,7 @@ def build_parser() -> argparse.ArgumentParser:
     search_doc.add_argument("--query", required=True)
     search_doc.add_argument("--page-size", type=int, default=10)
     search_doc.add_argument("--page-token")
-    search_doc.add_argument("--user-access-token")
+    search_doc.add_argument("--user-access-token", required=True, help="Use skill feishu-auth-and-scopes to obtain.")
     search_doc.set_defaults(func=cmd_search_doc)
 
     return parser

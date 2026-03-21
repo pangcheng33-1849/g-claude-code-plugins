@@ -12,7 +12,7 @@ def cmd_create_app(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="create-app",
     )
     body: dict[str, object] = {"name": args.name}
@@ -35,7 +35,7 @@ def cmd_get_app(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="get-app",
     )
     response = request_json(method="GET", path=f"/bitable/v1/apps/{args.app_token}", token=token)
@@ -55,7 +55,7 @@ def cmd_list_apps(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="list-apps",
     )
     response = request_json(
@@ -83,7 +83,7 @@ def cmd_update_app(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="update-app",
     )
     body: dict[str, object] = {}
@@ -110,7 +110,7 @@ def cmd_copy_app(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="copy-app",
     )
     body: dict[str, object] = {"name": args.name}

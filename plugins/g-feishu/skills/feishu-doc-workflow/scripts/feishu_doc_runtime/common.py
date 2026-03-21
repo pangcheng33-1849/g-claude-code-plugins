@@ -253,17 +253,12 @@ def resolve_user_open_id_by_query(query: str, *, bearer_token: str | None = None
     if not trimmed:
         raise SystemExit("user query is empty")
 
-    search_tokens: list[str] = []
-    if bearer_token:
-        search_tokens.append(bearer_token)
-    env_user_token = os.getenv("MY_LARK_USER_ACCESS_TOKEN", "").strip()
-    if env_user_token and env_user_token not in search_tokens:
-        search_tokens.append(env_user_token)
-    if not search_tokens:
+    if not bearer_token:
         raise SystemExit(
             "Resolving a user by email/name requires a search-capable user token. "
-            "Pass --user-access-token or set MY_LARK_USER_ACCESS_TOKEN first."
+            "Pass --user-access-token. Use skill feishu-auth-and-scopes to obtain."
         )
+    search_tokens: list[str] = [bearer_token]
 
     def normalize(value: object) -> str:
         return str(value).strip().casefold() if value is not None else ""

@@ -76,7 +76,7 @@ source ~/.zshrc
 补充说明：
 - `MY_LARK_EMAIL` 主要用于默认分享、默认参会人、默认成员授权等场景。
 - `MY_LARK_WEB_BASE_URL` 属于可选增强项。未设置时，文档和多维表格类 workflow 仍会返回稳定 ID，但不会伪造租户内网页链接。
-- `MY_LARK_USER_ACCESS_TOKEN`、`MY_LARK_TENANT_ACCESS_TOKEN`、`FEISHU_AUTH_CACHE_DIR`、`FEISHU_DOC_TASK_DIR` 都属于内部运行时变量或高级覆盖项，不要求用户手工配置。
+- Token 传递：所有 workflow 脚本要求通过 `--user-access-token` 或 `--tenant-access-token` 显式传递 token。使用 skill `feishu-auth-and-scopes` 的 `resolve-token` 命令获取。
 - 更完整的变量说明和 CLI 权限矩阵请看：
   - `feishu-auth-and-scopes/references/env-standards.md`
   - `feishu-auth-and-scopes/references/cli-scope-matrix.md`

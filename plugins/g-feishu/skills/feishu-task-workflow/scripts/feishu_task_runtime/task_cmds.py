@@ -221,7 +221,7 @@ def cmd_delete_task(args: argparse.Namespace) -> None:
 
 def cmd_list_tasks(args: argparse.Namespace) -> None:
     if args.use_tenant_token or args.tenant_access_token:
-        fail("list-tasks only supports user token according to Task v2 API. Use --user-access-token or MY_LARK_USER_ACCESS_TOKEN.")
+        fail("list-tasks only supports user token according to Task v2 API. Pass --user-access-token. Use skill feishu-auth-and-scopes to obtain a user token.")
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=None,

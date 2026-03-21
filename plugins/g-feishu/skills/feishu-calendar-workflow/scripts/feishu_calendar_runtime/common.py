@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
-import os
 import pathlib
 import re
 import urllib.error
@@ -107,32 +106,27 @@ def resolve_token(
     command_name: str,
     prefer_tenant: bool = False,
 ) -> tuple[str, str]:
-    if user_access_token:
-        return user_access_token, "argument_user_access_token"
-    if tenant_access_token:
-        return tenant_access_token, "argument_tenant_access_token"
+    if prefer_tenant:
+        if tenant_access_token:
+            return tenant_access_token, "argument_tenant_access_token"
+        if user_access_token:
+            return user_access_token, "argument_user_access_token"
+    else:
+        if user_access_token:
+            return user_access_token, "argument_user_access_token"
+        if tenant_access_token:
+            return tenant_access_token, "argument_tenant_access_token"
     if use_tenant_token:
-        env_tenant = os.environ.get("MY_LARK_TENANT_ACCESS_TOKEN")
-        if env_tenant:
-            return env_tenant, "environment_MY_LARK_TENANT_ACCESS_TOKEN"
+        if tenant_access_token:
+            return tenant_access_token, "argument_tenant_access_token"
         fail(
             f"{command_name} requested tenant mode, but no tenant token was provided. "
-            "Pass --tenant-access-token or set MY_LARK_TENANT_ACCESS_TOKEN."
+            "Pass --tenant-access-token explicitly. "
+            "Use skill feishu-auth-and-scopes resolve-token to obtain one first."
         )
-    if prefer_tenant:
-        env_tenant = os.environ.get("MY_LARK_TENANT_ACCESS_TOKEN")
-        if env_tenant:
-            return env_tenant, "environment_MY_LARK_TENANT_ACCESS_TOKEN"
-    env_user = os.environ.get("MY_LARK_USER_ACCESS_TOKEN")
-    if env_user:
-        return env_user, "environment_MY_LARK_USER_ACCESS_TOKEN"
-    env_tenant = os.environ.get("MY_LARK_TENANT_ACCESS_TOKEN")
-    if env_tenant:
-        return env_tenant, "environment_MY_LARK_TENANT_ACCESS_TOKEN"
     fail(
-        f"{command_name} requires a Feishu token. Pass --user-access-token / --tenant-access-token, "
-        "or set MY_LARK_USER_ACCESS_TOKEN / MY_LARK_TENANT_ACCESS_TOKEN. "
-        "Use Agent Skill feishu-auth-and-scopes to obtain or refresh a token first."
+        f"{command_name} requires a Feishu token. Pass --user-access-token or --tenant-access-token. "
+        "Use skill feishu-auth-and-scopes resolve-token to obtain a token first."
     )
 
 
@@ -245,9 +239,9 @@ def normalize_result(*, api_alias: str, auth_mode: str, response: dict[str, obje
 
 
 def add_token_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--user-access-token", help="Explicit user access token. Preferred for calendar operations.")
-    parser.add_argument("--tenant-access-token", help="Explicit tenant access token.")
-    parser.add_argument("--use-tenant-token", action="store_true", help="Prefer tenant token from MY_LARK_TENANT_ACCESS_TOKEN.")
+    parser.add_argument("--user-access-token", help="User access token. Use skill feishu-auth-and-scopes to obtain.")
+    parser.add_argument("--tenant-access-token", help="Tenant access token. Use skill feishu-auth-and-scopes to obtain.")
+    parser.add_argument("--use-tenant-token", action="store_true", help="Force tenant token mode (requires --tenant-access-token).")
 
 
 def add_calendar_arg(parser: argparse.ArgumentParser) -> None:
