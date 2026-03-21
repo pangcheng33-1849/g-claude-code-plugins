@@ -159,8 +159,8 @@ ln -sf ~/.claude/channels/feishu/profiles/default-sandbox.conf ~/.claude/channel
 ```
 已恢复 default 配置集（只读模式）。
 
-命令限制为：ls, cat, grep, git status/log/diff 等只读操作
-路径限制为：项目目录、~/.claude/channels/feishu、/tmp
+命令限制为：ls, cat, grep, git status/log/diff 等只读操作 + 插件/skill 脚本执行（限定目录和扩展名）
+路径限制为：项目目录、~/.claude/channels/feishu、~/.claude/plugins、*/.claude/skills|commands|agents、/tmp
 
 切换到开发模式：/feishu-channel-sandbox-profile dev
 ```

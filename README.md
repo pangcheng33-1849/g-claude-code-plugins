@@ -55,6 +55,8 @@ npx skills add https://github.com/pangcheng1849/g-claude-code-plugins --list
 |--------|-------------|---------|
 | [example-plugin](./plugins/example-plugin) | An example plugin with skill, agent, and hook | 1.0.0 |
 | [g-feishu](./plugins/g-feishu) | Feishu (Lark) integration skills for Claude Code | 1.3.0 |
+| [feishu-channel](./plugins/feishu-channel) | Connect Claude Code to Feishu via WebSocket — chat, access control, pairing auth | 1.0.0 |
+| [feishu-channel-sandbox](./plugins/feishu-channel-sandbox) | Optional security sandbox for feishu-channel — file/command whitelisting with glob patterns | 1.0.0 |
 | [xhs-research](./plugins/xhs-research) | Xiaohongshu reputation research workflow for Claude Code | 1.0.0 |
 
 ## Plugin Structure
