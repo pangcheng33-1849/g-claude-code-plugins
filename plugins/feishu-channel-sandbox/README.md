@@ -1,6 +1,6 @@
 # feishu-channel-sandbox
 
-可选的安全沙盒插件，配合 [feishu-channel](https://github.com/pangcheng1849/g-claude-code-plugins/tree/main/plugins/feishu-channel) 使用。限制通过飞书访问 Claude 时的文件读写和命令执行范围。
+可选的安全沙盒插件，配合 [feishu-channel](../feishu-channel) 使用。限制通过飞书访问 Claude 时的文件读写和命令执行范围。
 
 ## 安装
 

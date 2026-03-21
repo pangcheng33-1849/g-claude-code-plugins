@@ -278,7 +278,7 @@ grep 'sandbox-' ~/.claude/channels/feishu/logs/latest
 
 不需要时 `/plugin disable feishu-channel-sandbox` 即可关闭，不影响频道功能。
 
-详见 [feishu-channel-sandbox](https://github.com/pangcheng1849/g-claude-code-plugins/tree/main/plugins/feishu-channel-sandbox)。
+详见 [feishu-channel-sandbox](../feishu-channel-sandbox)。
 
 ## 开发
 

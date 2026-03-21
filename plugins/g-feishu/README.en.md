@@ -84,6 +84,16 @@ source ~/.zshrc
 - Real API execution, structured I/O, and stable command entry points are handled by `scripts/`.
 - Cross-skill collaboration is done by skill name — no code-level imports across skills.
 
+## Using with feishu-channel
+
+The [feishu-channel](../feishu-channel) plugin connects Claude Code to Feishu, allowing you to chat with Claude directly in Feishu DMs or group chats. Once feishu-channel is installed, Claude automatically recognizes and uses g-feishu skills to handle Feishu tasks (sending messages, creating docs, checking calendars, etc.).
+
+```bash
+/plugin install feishu-channel@g-claude-code-plugins
+```
+
+To restrict operations when accessed via Feishu, add [feishu-channel-sandbox](../feishu-channel-sandbox).
+
 ## Publishing
 
 - Include this directory as-is when publishing.
