@@ -1,0 +1,15 @@
+{
+  "description": "Feishu channel hooks — load .env credentials into session",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/load-env.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

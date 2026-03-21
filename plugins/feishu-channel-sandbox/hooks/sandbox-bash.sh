@@ -87,7 +87,8 @@ canonicalize() {
 # 检查单个路径是否在允许范围内（cwd + sandbox.conf）
 # 使用目录边界匹配：/tmp 允许 /tmp/foo 但不允许 /tmpevil
 is_path_allowed() {
-  local CANONICAL=$(canonicalize "$(expand_home "$1")")
+  local EXPANDED=$(expand_home "$1")
+  local CANONICAL=$(canonicalize "$EXPANDED")
 
   # cwd 自动放行
   if [[ -n "$CWD" ]]; then
@@ -102,9 +103,10 @@ is_path_allowed() {
       [[ -z "${line// /}" ]] && continue
       local PATTERN=$(echo "$line" | xargs)
 
-      # 含 glob 元字符 → glob 匹配
+      # 含 glob 元字符 → glob 匹配（同时检查规范化路径和原始路径，兼容 symlink）
       if [[ "$PATTERN" == *'*'* || "$PATTERN" == *'?'* || "$PATTERN" == *'['* ]]; then
         [[ "$CANONICAL" == $PATTERN ]] && return 0
+        [[ "$EXPANDED" != "$CANONICAL" && "$EXPANDED" == $PATTERN ]] && return 0
       else
         # 无 glob 元字符 → 展开 ~，规范化，目录边界前缀匹配
         local ALLOWED=$(canonicalize "$(expand_home "$PATTERN")")
@@ -236,6 +238,41 @@ fi
 # ---------------------------------------------------------------------------
 # 第 2 层：每段命令前缀白名单
 # ---------------------------------------------------------------------------
+# 预处理：如果某段是 cd <dir>，将后续段中的相对路径展开为绝对路径。
+# 这样 "cd /a/b && python3 scripts/run.py" 变成 "python3 /a/b/scripts/run.py"。
+
+CD_DIR=""
+for i in "${!CMD_SEGMENTS[@]}"; do
+  local_seg="${CMD_SEGMENTS[$i]}"
+  local_trimmed=$(echo "$local_seg" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
+
+  # 检测 cd <dir> 段，记录目录
+  if [[ "$local_trimmed" =~ ^cd[[:space:]]+(.+)$ ]]; then
+    CD_DIR=$(expand_home "${BASH_REMATCH[1]}")
+    CD_DIR="${CD_DIR%/}"  # 去掉尾部 /
+  elif [[ -n "$CD_DIR" ]]; then
+    # 对后续段展开相对路径：在命令名后面的非 -/绝对路径 token 前加 CD_DIR/
+    local_expanded=""
+    local_first=true
+    for token in $local_trimmed; do
+      if $local_first; then
+        local_expanded="$token"
+        local_first=false
+      elif [[ "$token" != /* && "$token" != ~* && "$token" != -* && "$token" != *.* || "$token" == */* ]]; then
+        # 看起来像相对路径（含 / 但不以 / ~ - 开头）
+        if [[ "$token" == */* && "$token" != /* && "$token" != ~* ]]; then
+          local_expanded="$local_expanded $CD_DIR/$token"
+        else
+          local_expanded="$local_expanded $token"
+        fi
+      else
+        local_expanded="$local_expanded $token"
+      fi
+    done
+    CMD_SEGMENTS[$i]="$local_expanded"
+    CD_DIR=""  # 只影响紧接的一段
+  fi
+done
 
 for seg in "${CMD_SEGMENTS[@]}"; do
   if ! is_prefix_allowed "$seg"; then
@@ -266,6 +303,8 @@ while IFS= read -r p; do
   [ -z "$p" ] && continue
   # /dev/* 始终放行（/dev/null、/dev/zero 等）
   [[ "$p" == /dev/* ]] && continue
+  # // 是 jq alternative operator，不是路径
+  [[ "$p" == "//" ]] && continue
   if ! is_path_allowed "$p"; then
     BLOCKED_PATH="$p"
     break

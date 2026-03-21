@@ -69,7 +69,8 @@ canonicalize() {
 
 # 对输入路径进行展开和规范化
 # 例如 /tmp/../etc/passwd → /etc/passwd，~/.ssh → /Users/xxx/.ssh
-FILE_PATH_CANONICAL=$(canonicalize "$(expand_home "$FILE_PATH")")
+FILE_PATH_EXPANDED=$(expand_home "$FILE_PATH")
+FILE_PATH_CANONICAL=$(canonicalize "$FILE_PATH_EXPANDED")
 
 # 检查 1：Claude 工作目录自动放行
 # cwd 也需要规范化，防止 cwd 本身包含符号链接
@@ -88,10 +89,14 @@ while IFS= read -r line; do
 
   TRIMMED_LINE=$(echo "$line" | xargs)
 
-  # 含 glob 元字符 → glob 匹配
+  # 含 glob 元字符 → glob 匹配（同时检查规范化路径和原始路径，兼容 symlink）
   if [[ "$TRIMMED_LINE" == *'*'* || "$TRIMMED_LINE" == *'?'* || "$TRIMMED_LINE" == *'['* ]]; then
     if [[ "$FILE_PATH_CANONICAL" == $TRIMMED_LINE ]]; then
       log_sandbox "ALLOW path=$FILE_PATH_CANONICAL (glob: $TRIMMED_LINE)"
+      exit 0
+    fi
+    if [[ "$FILE_PATH_EXPANDED" != "$FILE_PATH_CANONICAL" && "$FILE_PATH_EXPANDED" == $TRIMMED_LINE ]]; then
+      log_sandbox "ALLOW path=$FILE_PATH_EXPANDED (glob via original: $TRIMMED_LINE)"
       exit 0
     fi
     continue

@@ -319,6 +319,62 @@ expect_block '~/.claude/rules 不在白名单' \
 echo ""
 
 # ---------------------------------------------------------------------------
+echo -e "${YELLOW}── symlink 兼容（原始路径匹配 glob）──${NC}"
+# ---------------------------------------------------------------------------
+
+# 模拟 .claude/skills → .agents/skills 的 symlink 场景（真实环境中 Claude Code 可能这样做）
+SYMLINK_TARGET="$TEST_HOME/.agents/skills"
+mkdir -p "$SYMLINK_TARGET/feishu-search/scripts"
+rm -rf "$TEST_HOME/.claude/skills"
+ln -sf "$SYMLINK_TARGET" "$TEST_HOME/.claude/skills"
+
+expect_allow 'symlink: file 通过 .claude/skills/ 访问（原始路径匹配 glob）' \
+  run_file_hook "$TEST_HOME/.claude/skills/feishu-search/scripts/helper.py"
+
+expect_allow 'symlink: bash python3 通过 .claude/skills/（原始路径匹配 glob）' \
+  run_bash_hook "python3 $TEST_HOME/.claude/skills/feishu-search/scripts/helper.py --query test"
+
+expect_block 'symlink: 真实目标路径不直接匹配（.agents/skills 不在白名单）' \
+  run_file_hook "$SYMLINK_TARGET/feishu-search/scripts/helper.py"
+
+# 清理 symlink 测试环境，恢复 skills 为真实目录
+rm -f "$TEST_HOME/.claude/skills"
+rm -rf "$SYMLINK_TARGET"
+mkdir -p "$TEST_HOME/.claude/skills"
+
+echo ""
+
+# ---------------------------------------------------------------------------
+echo -e "${YELLOW}── cd 到 skill/plugin 目录 ──${NC}"
+# ---------------------------------------------------------------------------
+
+expect_allow 'cd 到 cwd 子目录' \
+  run_bash_hook "cd $TEST_CWD/src"
+
+expect_allow 'cd 到 skill 目录（路径在白名单）' \
+  run_bash_hook "cd $TEST_HOME/.claude/skills/my-skill"
+
+expect_allow 'cd 到 channel 目录' \
+  run_bash_hook "cd $TEST_HOME/.claude/channels/feishu"
+
+expect_block 'cd 到 ~/Downloads（路径不在白名单）' \
+  run_bash_hook "cd $TEST_HOME/Downloads"
+
+expect_block 'cd 到 /etc' \
+  run_bash_hook "cd /etc"
+
+expect_allow 'cd skill 目录 && python3 相对路径脚本' \
+  run_bash_hook "cd /a/.claude/skills/my-skill && python3 scripts/run.py --query test"
+
+expect_allow 'cd 插件目录 && node 相对路径脚本' \
+  run_bash_hook "cd $TEST_HOME/.claude/plugins/cache/foo && node scripts/check.js"
+
+expect_block 'cd 非白名单目录 && python3 相对路径（cd 段路径检查拦截）' \
+  run_bash_hook "cd /etc && python3 scripts/run.py"
+
+echo ""
+
+# ---------------------------------------------------------------------------
 echo -e "${YELLOW}── ~ 展开与 glob 模式的交叉测试（sandbox-bash 层） ──${NC}"
 # ---------------------------------------------------------------------------
 
@@ -576,6 +632,24 @@ expect_allow 'python3 插件脚本带重定向 /dev/null' \
 
 expect_allow 'ln -sf ~/.claude/channels/feishu（~ 展开兼容）' \
   run_bash_hook "ln -sf $TEST_HOME/.claude/channels/feishu/profiles/dev-bash.conf $TEST_HOME/.claude/channels/feishu/sandbox-bash.conf"
+
+echo ""
+
+# ---------------------------------------------------------------------------
+echo -e "${YELLOW}── jq // 和 auth cache 路径 ──${NC}"
+# ---------------------------------------------------------------------------
+
+expect_allow 'jq // empty 不误判为路径' \
+  run_bash_hook "cat /tmp/data.json | jq -r '.access_token // empty'"
+
+expect_allow 'resolve-token 管道 jq // empty' \
+  run_bash_hook "python3 /a/.claude/skills/auth/scripts/helper.py | jq -r '.token // empty'"
+
+expect_block 'cat ~/.feishu-auth-cache（token 缓存不暴露）' \
+  run_bash_hook "cat $TEST_HOME/.feishu-auth-cache/user-token-cli_xxx.json"
+
+expect_block 'Read ~/.feishu-auth-cache（token 缓存不暴露）' \
+  run_file_hook "$TEST_HOME/.feishu-auth-cache/user-token-cli_xxx.json"
 
 echo ""
 
