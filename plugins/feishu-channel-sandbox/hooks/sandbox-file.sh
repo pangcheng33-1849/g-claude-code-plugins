@@ -81,17 +81,27 @@ if [[ -n "$CWD" ]]; then
   fi
 fi
 
-# 检查 2：逐行读取 sandbox.conf，对每个允许路径规范化后做前缀匹配
+# 检查 2：逐行读取 sandbox.conf，支持 glob 模式匹配和前缀匹配
 while IFS= read -r line; do
-  # 跳过注释行（# 开头）和空行
   [[ "$line" =~ ^[[:space:]]*# ]] && continue
   [[ -z "${line// /}" ]] && continue
 
-  # 去除首尾空白（xargs），展开 ~，规范化路径
-  ALLOWED_CANONICAL=$(canonicalize "$(expand_home "$(echo "$line" | xargs)")")
+  TRIMMED_LINE=$(echo "$line" | xargs)
+
+  # 含 glob 元字符 → glob 匹配
+  if [[ "$TRIMMED_LINE" == *'*'* || "$TRIMMED_LINE" == *'?'* || "$TRIMMED_LINE" == *'['* ]]; then
+    if [[ "$FILE_PATH_CANONICAL" == $TRIMMED_LINE ]]; then
+      log_sandbox "ALLOW path=$FILE_PATH_CANONICAL (glob: $TRIMMED_LINE)"
+      exit 0
+    fi
+    continue
+  fi
+
+  # 无 glob 元字符 → 展开 ~，规范化，目录边界前缀匹配
+  ALLOWED_CANONICAL=$(canonicalize "$(expand_home "$TRIMMED_LINE")")
   if [[ "$FILE_PATH_CANONICAL" == "$ALLOWED_CANONICAL" || "$FILE_PATH_CANONICAL" == "$ALLOWED_CANONICAL/"* ]]; then
     log_sandbox "ALLOW path=$FILE_PATH_CANONICAL"
-    exit 0  # 匹配白名单，放行
+    exit 0
   fi
 done < "$CONF"
 

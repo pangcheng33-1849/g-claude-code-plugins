@@ -5,7 +5,7 @@
 #
 # 作为 PreToolUse hook 拦截 Bash 工具调用，执行三层检查：
 #   1. 命令拆分 + 子 shell 检测 — 拒绝 $()、``、<()、>() 构造
-#   2. 每段命令前缀白名单 — 管道/链式命令的每一段都必须在白名单内
+#   2. glob 模式白名单 — 管道/链式命令的每一段都必须匹配白名单
 #   3. 路径白名单 — 命令中出现的文件路径必须在允许范围内
 #
 # 第一层防止通过子 shell 执行任意命令。
@@ -13,7 +13,7 @@
 # 第三层防止白名单命令（如 cat、ls）访问不在允许范围内的路径。
 #
 # 安全策略：
-#   - 白名单模式（而非黑名单）：只允许明确列出的命令前缀
+#   - 白名单模式（而非黑名单）：只允许明确列出的命令
 #   - fail-closed：配置文件缺失时阻止所有命令
 #   - 子 shell 阻止：$()、``、<()、>() 构造被直接拒绝
 #   - 管道/链式拆分：按引号感知方式拆分命令，每段独立校验
@@ -21,9 +21,10 @@
 #   - 路径检查复用 sandbox.conf 的白名单 + cwd 自动放行
 #
 # 白名单配置：~/.claude/channels/feishu/sandbox-bash.conf
-#   每行一个命令前缀，命令必须以某个前缀开头才放行。
-#   例如 "git status" 允许 "git status"、"git status --short" 等。
-#   但 "git" 作为前缀会允许所有 git 子命令。
+#   支持两种匹配模式：
+#   - 无 glob 字符（如 "git status"）→ 前缀匹配，允许 "git status --short" 等
+#   - 含 glob 字符（如 "python3 /*/.claude/skills/*.py"）→ bash glob 匹配
+#   glob 中 * 匹配任意字符（含 / 和空格），对齐 Claude Code allow 机制风格。
 #
 # 输入：PreToolUse hook 的 JSON（通过 stdin），包含 tool_input.command 和 cwd
 # 输出：exit 0 = 放行，exit 2 = 阻止（stderr 输出原因）
@@ -94,13 +95,21 @@ is_path_allowed() {
     [[ "$CANONICAL" == "$CWD_C" || "$CANONICAL" == "$CWD_C/"* ]] && return 0
   fi
 
-  # 检查 sandbox.conf
+  # 检查 sandbox.conf（支持 glob 模式匹配）
   if [ -f "$PATH_CONF" ]; then
     while IFS= read -r line; do
       [[ "$line" =~ ^[[:space:]]*# ]] && continue
       [[ -z "${line// /}" ]] && continue
-      local ALLOWED=$(canonicalize "$(expand_home "$(echo "$line" | xargs)")")
-      [[ "$CANONICAL" == "$ALLOWED" || "$CANONICAL" == "$ALLOWED/"* ]] && return 0
+      local PATTERN=$(echo "$line" | xargs)
+
+      # 含 glob 元字符 → glob 匹配
+      if [[ "$PATTERN" == *'*'* || "$PATTERN" == *'?'* || "$PATTERN" == *'['* ]]; then
+        [[ "$CANONICAL" == $PATTERN ]] && return 0
+      else
+        # 无 glob 元字符 → 展开 ~，规范化，目录边界前缀匹配
+        local ALLOWED=$(canonicalize "$(expand_home "$PATTERN")")
+        [[ "$CANONICAL" == "$ALLOWED" || "$CANONICAL" == "$ALLOWED/"* ]] && return 0
+      fi
     done < "$PATH_CONF"
   fi
 
@@ -187,18 +196,28 @@ split_command_segments() {
   return 0
 }
 
-# 检查单个命令段是否匹配白名单前缀
+# 检查单个命令段是否匹配白名单
+# 使用 bash 原生 glob 匹配（对齐 Claude Code allow 机制）：
+#   - 含 glob 元字符（* ? [）的行 → [[ "$cmd" == $PATTERN ]] glob 匹配
+#   - 无 glob 元字符的行 → 前缀匹配（自动追加 *）
+# ~ 在匹配前展开为 $HOME
 is_prefix_allowed() {
   local segment="$1"
-  # 去除首尾空白
   segment=$(echo "$segment" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
   [ -z "$segment" ] && return 0  # 空段放行
 
   while IFS= read -r line; do
     [[ "$line" =~ ^[[:space:]]*# ]] && continue
     [[ -z "${line// /}" ]] && continue
-    local PREFIX=$(echo "$line" | xargs)
-    [[ "$segment" == "$PREFIX"* ]] && return 0
+    local PATTERN=$(echo "$line" | xargs)
+    PATTERN="${PATTERN//\~/$HOME}"
+
+    # 含 glob 元字符 → glob 匹配；无 → 前缀匹配
+    if [[ "$PATTERN" == *'*'* || "$PATTERN" == *'?'* || "$PATTERN" == *'['* ]]; then
+      [[ "$segment" == $PATTERN ]] && return 0
+    else
+      [[ "$segment" == "$PATTERN"* ]] && return 0
+    fi
   done < "$CONF"
 
   return 1

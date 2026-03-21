@@ -267,6 +267,78 @@ expect_block '/tmp/../etc/passwd' \
 
 echo ""
 
+# ---------------------------------------------------------------------------
+echo -e "${YELLOW}── glob 路径匹配 ──${NC}"
+# ---------------------------------------------------------------------------
+
+expect_allow '~/.claude/plugins 内文件（精确前缀）' \
+  run_file_hook "$TEST_HOME/.claude/plugins/cache/abc/script.py"
+
+expect_allow '*/.claude/skills 匹配 cwd 祖先' \
+  run_file_hook "/Users/testuser/.claude/skills/my-skill/SKILL.md"
+
+expect_allow '*/.claude/commands 匹配用户级' \
+  run_file_hook "$TEST_HOME/.claude/commands/my-cmd.md"
+
+expect_allow '*/.claude/agents 匹配项目祖先' \
+  run_file_hook "/Users/testuser/workspace/.claude/agents/helper.md"
+
+expect_allow '*/.claude/skills 深层子路径' \
+  run_file_hook "/some/repo/.claude/skills/my-skill/scripts/helper.py"
+
+expect_block '*/.claude 本身不匹配（需要具体子目录）' \
+  run_file_hook "/Users/testuser/.claude/settings.json"
+
+expect_block '非 .claude 目录不匹配通配' \
+  run_file_hook "/Users/testuser/.config/skills/foo"
+
+expect_allow 'Bash 路径检查也支持通配' \
+  run_bash_hook "cat /Users/testuser/.claude/skills/my-skill/SKILL.md"
+
+expect_allow 'Bash 插件缓存路径' \
+  run_bash_hook "cat $TEST_HOME/.claude/plugins/cache/foo/script.py"
+
+expect_block 'Bash ~/.claude/settings.json 仍被拦截' \
+  run_bash_hook "cat $TEST_HOME/.claude/settings.json"
+
+expect_block '通配不匹配 .claude-evil/skills（目录边界）' \
+  run_file_hook "/Users/testuser/.claude-evil/skills/foo.md"
+
+expect_allow '通配匹配多级祖先的 .claude/skills' \
+  run_file_hook "/a/.claude/skills/deep/nested/file.py"
+
+expect_block '通配不匹配 .claude/skill（少了 s）' \
+  run_file_hook "/Users/testuser/.claude/skill/foo.md"
+
+expect_allow '插件 data 目录（~/.claude/plugins 子路径）' \
+  run_file_hook "$TEST_HOME/.claude/plugins/data/my-plugin/state.json"
+
+expect_block '~/.claude/rules 不在白名单' \
+  run_file_hook "$TEST_HOME/.claude/rules/my-rule.md"
+
+echo ""
+
+# ---------------------------------------------------------------------------
+echo -e "${YELLOW}── ~ 展开与 glob 模式的交叉测试（sandbox-bash 层） ──${NC}"
+# ---------------------------------------------------------------------------
+
+expect_allow 'cp 白名单（~ 展开）' \
+  run_bash_hook "cp $TEST_HOME/.claude/channels/feishu/profiles/dev-bash.conf $TEST_HOME/.claude/channels/feishu/profiles/custom-bash.conf"
+
+expect_allow 'rm 白名单（~ 展开）' \
+  run_bash_hook "rm $TEST_HOME/.claude/channels/feishu/profiles/custom-bash.conf"
+
+expect_block 'rm 非白名单路径（~ 展开不影响安全）' \
+  run_bash_hook "rm $TEST_HOME/.claude/settings.json"
+
+expect_block 'cp 源在白名单但目标不在' \
+  run_bash_hook "cp $TEST_HOME/.claude/channels/feishu/profiles/dev-bash.conf ~/Desktop/stolen.conf"
+
+expect_allow 'readlink 白名单文件' \
+  run_bash_hook "readlink $TEST_HOME/.claude/channels/feishu/sandbox-bash.conf"
+
+echo ""
+
 # ══════════════════════════════════════════════════════════════════════════
 echo -e "${CYAN}╔══════════════════════════════════════════════════════╗${NC}"
 echo -e "${CYAN}║              DEFAULT profile 行为测试                ║${NC}"
@@ -379,8 +451,11 @@ expect_block 'npm install' \
 expect_block 'npm run' \
   run_bash_hook 'npm run build'
 
-expect_block 'mkdir' \
-  run_bash_hook "mkdir $TEST_CWD/new-dir"
+expect_allow 'mkdir（channel skill 支持）' \
+  run_bash_hook "mkdir -p $TEST_CWD/new-dir"
+
+expect_block 'mkdir 受限路径' \
+  run_bash_hook "mkdir ~/Downloads/evil"
 
 expect_block 'rm' \
   run_bash_hook "rm $TEST_CWD/file.ts"
@@ -418,6 +493,132 @@ expect_block 'kill' \
 echo ""
 
 # ---------------------------------------------------------------------------
+echo -e "${YELLOW}── default 限定路径的脚本执行 ──${NC}"
+# ---------------------------------------------------------------------------
+
+expect_allow 'python3 插件脚本（~ 展开匹配）' \
+  run_bash_hook "python3 $TEST_HOME/.claude/plugins/cache/g-feishu/scripts/helper.py send-message"
+
+expect_allow 'node 插件脚本' \
+  run_bash_hook "node $TEST_HOME/.claude/plugins/cache/some-plugin/scripts/build.js"
+
+expect_allow 'bash 插件脚本' \
+  run_bash_hook "bash $TEST_HOME/.claude/plugins/cache/some-plugin/hooks/setup.sh"
+
+expect_allow 'bun 插件脚本' \
+  run_bash_hook "bun $TEST_HOME/.claude/plugins/cache/feishu-channel/server.ts"
+
+expect_allow 'python3 项目 skill 脚本（*/ 通配）' \
+  run_bash_hook "python3 /Users/testuser/workspace/.claude/skills/my-skill/scripts/run.py"
+
+expect_allow 'node 项目 skill 脚本' \
+  run_bash_hook "node /Users/testuser/workspace/.claude/skills/my-skill/scripts/tool.js"
+
+expect_block 'python3 -c（裸执行仍被拦截）' \
+  run_bash_hook 'python3 -c "import os; os.system(\"id\")"'
+
+expect_block 'node -e（裸执行仍被拦截）' \
+  run_bash_hook 'node -e "require(\"child_process\").execSync(\"id\")"'
+
+# ── 通配路径伪造绕过测试 ──
+# 在 -c 参数的字符串中嵌入 .claude/skills/ 路径，尝试欺骗 */ 通配匹配
+
+expect_block 'python3 -c 内嵌 .claude/skills/ 路径（伪造通配）' \
+  run_bash_hook 'python3 -c "x='"'"'/.claude/skills/'"'"'; import os; os.system('"'"'id'"'"')"'
+
+expect_block 'node -e 内嵌 .claude/skills/ 路径（伪造通配）' \
+  run_bash_hook 'node -e "x='"'"'/.claude/skills/'"'"'; require('"'"'child_process'"'"').execSync('"'"'id'"'"')"'
+
+expect_block 'bash -c 内嵌 .claude/plugins/ 路径（伪造通配）' \
+  run_bash_hook "bash -c 'echo /.claude/plugins/pwned'"
+
+expect_block 'python3 --flag 后跟 skill 路径（非第一参数）' \
+  run_bash_hook "python3 --verbose /Users/testuser/.claude/skills/my-skill/run.py"
+
+expect_block 'python3 任意路径脚本' \
+  run_bash_hook "python3 ~/Downloads/evil.py"
+
+expect_block 'bash 任意路径脚本' \
+  run_bash_hook "bash ~/evil.sh"
+
+expect_block 'bun 任意路径脚本' \
+  run_bash_hook "bun ~/Desktop/server.ts"
+
+expect_block 'node 任意路径脚本' \
+  run_bash_hook "node /etc/evil.js"
+
+expect_allow 'python3 用户级 skill 脚本' \
+  run_bash_hook "python3 $TEST_HOME/.claude/skills/my-tool/scripts/run.py --arg1 val"
+
+expect_allow 'bash 祖先项目 skill 脚本' \
+  run_bash_hook "bash /Users/testuser/.claude/skills/deploy/scripts/build.sh"
+
+expect_allow 'node 深层嵌套 skill 脚本' \
+  run_bash_hook "node /a/b/c/.claude/skills/lint/scripts/check.js --fix"
+
+expect_allow 'bun 插件 skill 脚本' \
+  run_bash_hook "bun $TEST_HOME/.claude/plugins/cache/my-plugin/skills/gen/scripts/run.ts"
+
+expect_block 'python3 .claude 但非 skills/plugins 子目录' \
+  run_bash_hook "python3 $TEST_HOME/.claude/settings.json"
+
+expect_block 'node .claude/projects（不在白名单）' \
+  run_bash_hook "node $TEST_HOME/.claude/projects/abc/memory/run.js"
+
+expect_allow 'python3 插件脚本带管道（两段都需通过）' \
+  run_bash_hook "python3 $TEST_HOME/.claude/plugins/cache/foo/script.py | grep result"
+
+expect_block 'python3 插件脚本管道到 sh（sh 段被拦截）' \
+  run_bash_hook "python3 $TEST_HOME/.claude/plugins/cache/foo/script.py | sh"
+
+expect_allow 'python3 插件脚本带重定向 /dev/null' \
+  run_bash_hook "python3 $TEST_HOME/.claude/plugins/cache/foo/script.py 2>/dev/null"
+
+expect_allow 'ln -sf ~/.claude/channels/feishu（~ 展开兼容）' \
+  run_bash_hook "ln -sf $TEST_HOME/.claude/channels/feishu/profiles/dev-bash.conf $TEST_HOME/.claude/channels/feishu/sandbox-bash.conf"
+
+echo ""
+
+# ---------------------------------------------------------------------------
+echo -e "${YELLOW}── glob 扩展名精确匹配 ──${NC}"
+# ---------------------------------------------------------------------------
+
+expect_block 'python3 .pyc 文件（扩展名不匹配）' \
+  run_bash_hook "python3 /a/.claude/skills/s/run.pyc"
+
+expect_block 'python3 .pyw 文件（扩展名不匹配）' \
+  run_bash_hook "python3 /a/.claude/skills/s/run.pyw"
+
+expect_block 'node .json 文件（扩展名不匹配）' \
+  run_bash_hook "node /a/.claude/skills/s/data.json"
+
+expect_block 'node .jsx 文件（扩展名不匹配）' \
+  run_bash_hook "node /a/.claude/skills/s/component.jsx"
+
+expect_block 'bash .bash 文件（扩展名不匹配）' \
+  run_bash_hook "bash /a/.claude/skills/s/run.bash"
+
+expect_block 'python3 无扩展名文件' \
+  run_bash_hook "python3 /a/.claude/skills/s/run"
+
+expect_allow 'python3 skill .py 带参数' \
+  run_bash_hook "python3 /a/.claude/skills/s/run.py --arg1 val --arg2"
+
+expect_allow 'node 插件 .js 带参数' \
+  run_bash_hook "node $TEST_HOME/.claude/plugins/cache/foo/check.js --fix"
+
+expect_allow 'bash skill .sh 无参数' \
+  run_bash_hook "bash /a/b/.claude/skills/deploy/build.sh"
+
+expect_allow 'bun skill .ts 带参数' \
+  run_bash_hook "bun /a/.claude/skills/s/run.ts --watch"
+
+expect_allow 'bun skill .js 无参数' \
+  run_bash_hook "bun /a/.claude/skills/s/run.js"
+
+echo ""
+
+# ---------------------------------------------------------------------------
 echo -e "${YELLOW}── default 路径白名单 ──${NC}"
 # ---------------------------------------------------------------------------
 
@@ -429,6 +630,18 @@ expect_allow 'Read /tmp 文件' \
 
 expect_allow 'Read ~/.claude/channels/feishu' \
   run_file_hook "$TEST_HOME/.claude/channels/feishu/access.json"
+
+expect_allow 'Read ~/.claude/plugins（插件缓存）' \
+  run_file_hook "$TEST_HOME/.claude/plugins/cache/g-feishu/skills/im/SKILL.md"
+
+expect_allow 'Read */.claude/skills（用户级 skill）' \
+  run_file_hook "$TEST_HOME/.claude/skills/my-skill/SKILL.md"
+
+expect_allow 'Read */.claude/commands（用户级命令）' \
+  run_file_hook "$TEST_HOME/.claude/commands/deploy.md"
+
+expect_allow 'Read */.claude/agents（任意位置）' \
+  run_file_hook "/some/project/.claude/agents/reviewer.md"
 
 expect_block 'Read /usr/local' \
   run_file_hook '/usr/local/bin/node'
@@ -646,6 +859,12 @@ echo ""
 echo -e "${YELLOW}── dev 扩展路径白名单 ──${NC}"
 # ---------------------------------------------------------------------------
 
+expect_allow 'Read ~/.claude/plugins（dev 也放行）' \
+  run_file_hook "$TEST_HOME/.claude/plugins/cache/g-feishu/scripts/helper.py"
+
+expect_allow 'Read */.claude/skills（dev 也放行）' \
+  run_file_hook "$TEST_HOME/.claude/skills/my-skill/SKILL.md"
+
 expect_allow 'Read /usr/local' \
   run_file_hook '/usr/local/bin/node'
 
@@ -705,6 +924,50 @@ expect_block 'rm ~/Downloads（路径检查仍生效）' \
 
 expect_block 'curl -o 受限路径（命令允许但路径阻止）' \
   run_bash_hook 'curl -o ~/Downloads/data.json https://example.com/api'
+
+expect_allow 'python3 -c（dev 全开 python3）' \
+  run_bash_hook 'python3 -c "print(1)"'
+
+expect_allow 'node -e（dev 全开 node）' \
+  run_bash_hook 'node -e "console.log(1)"'
+
+echo ""
+
+# ---------------------------------------------------------------------------
+echo -e "${YELLOW}── dev 插件/skill 脚本执行 ──${NC}"
+# ---------------------------------------------------------------------------
+
+expect_allow 'dev: python3 插件脚本' \
+  run_bash_hook "python3 $TEST_HOME/.claude/plugins/cache/g-feishu/scripts/helper.py"
+
+expect_allow 'dev: python3 cwd 内脚本（dev 全开 python3）' \
+  run_bash_hook "python3 $TEST_CWD/scripts/analyze.py"
+
+expect_allow 'dev: node cwd 内脚本' \
+  run_bash_hook "node $TEST_CWD/scripts/build.js"
+
+expect_allow 'dev: python3 skill 脚本带参数' \
+  run_bash_hook "python3 /workspace/.claude/skills/tool/scripts/run.py --verbose --output /tmp/out.json"
+
+expect_block 'dev: python3 ~/Documents（路径仍受限）' \
+  run_bash_hook "python3 ~/Documents/evil.py"
+
+echo ""
+
+# ---------------------------------------------------------------------------
+echo -e "${YELLOW}── 配置缺失安全降级 ──${NC}"
+# ---------------------------------------------------------------------------
+
+# 临时移除配置测试 fail-closed
+mv "$CONF_DIR/sandbox-bash.conf" "$CONF_DIR/sandbox-bash.conf.bak"
+expect_block 'bash conf 缺失 → 阻止所有命令' \
+  run_bash_hook 'echo hello'
+mv "$CONF_DIR/sandbox-bash.conf.bak" "$CONF_DIR/sandbox-bash.conf"
+
+mv "$CONF_DIR/sandbox.conf" "$CONF_DIR/sandbox.conf.bak"
+expect_block 'file conf 缺失 → 阻止所有文件操作' \
+  run_file_hook "$TEST_CWD/README.md"
+mv "$CONF_DIR/sandbox.conf.bak" "$CONF_DIR/sandbox.conf"
 
 echo ""
 
