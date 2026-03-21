@@ -13,7 +13,7 @@ allowed-tools:
 
 将应用凭证写入 `~/.claude/channels/feishu/.env`，并引导用户了解访问策略。服务器在启动时读取这两个文件。
 
-注意：服务器也会从用户的 shell 配置（如 `.zshenv`）读取环境变量 `MY_LARK_APP_ID` 和 `MY_LARK_APP_SECRET`。如果环境变量已设置，.env 文件是可选的。
+注意：`.env` 文件优先级高于 shell 环境变量。如果 `.env` 中配置了凭证，会覆盖 `.zshenv` 等设置的同名变量。
 
 传入参数：`$ARGUMENTS`
 
@@ -25,7 +25,7 @@ allowed-tools:
 
 显示当前凭证配置：
 
-1. **凭证** — 先检查 shell 环境变量 `MY_LARK_APP_ID` / `MY_LARK_APP_SECRET`。如未设置，检查 `~/.claude/channels/feishu/.env` 中的 `MY_LARK_APP_ID`。显示已设置/未设置；如已设置，显示前 8 位掩码（`cli_a8e1...`）。
+1. **凭证** — 先检查 `~/.claude/channels/feishu/.env` 中的 `MY_LARK_APP_ID`（优先）。如未设置，检查 shell 环境变量 `MY_LARK_APP_ID` / `MY_LARK_APP_SECRET`。显示已设置/未设置及来源（.env / 环境变量）；如已设置，显示前 8 位掩码（`cli_a8e1...`）。
 
 2. **下一步** — 根据凭证状态给出提示：
    - 无凭证 → *"在 .zshenv 中设置 MY_LARK_APP_ID 和 MY_LARK_APP_SECRET，或运行 `/feishu-channel-configure <appId> <appSecret>`。"*
@@ -38,6 +38,7 @@ allowed-tools:
 3. 读取已有的 `.env`（如存在）；更新/添加 `MY_LARK_APP_ID=` 和 `MY_LARK_APP_SECRET=` 行，保留其他配置。写回，不加引号。
 4. 可选设置 `MY_LARK_BRAND=feishu`（国际版用 `lark`）。
 5. 确认，然后显示无参数状态，让用户了解当前情况。
+6. 提示用户：*"凭证已保存。运行 `/mcp` 重新连接 MCP 使配置生效（仅 `/reload-plugins` 不够，需要重连 MCP 以重启服务器进程）。"*
 
 ### `clear` — 清除凭证
 
@@ -69,5 +70,5 @@ allowed-tools:
 ## 实现注意事项
 
 - channels 目录可能不存在（服务器尚未运行过）。文件不存在 = 未配置，不是错误。
-- 服务器启动时读取一次 `.env`（先检查 shell 环境变量）。凭证变更需要重启会话或 `/reload-plugins`，保存后需告知用户。
+- 服务器启动时读取一次 `.env`（先检查 shell 环境变量）。凭证变更需要 `/mcp` 重连 MCP（重启 bun 进程），仅 `/reload-plugins` 不会重启 MCP server。
 - `access.json` 在每条入站消息时重新读取 — 通过 `/feishu-channel-access` 的策略变更立即生效，无需重启。

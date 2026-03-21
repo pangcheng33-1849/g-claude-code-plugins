@@ -36,13 +36,13 @@ export MY_LARK_APP_ID="cli_xxxxxxxx"
 export MY_LARK_APP_SECRET="xxxxxxxxxxxxxxxx"
 ```
 
-**方式二**：通过技能配置：
+**方式二**：通过技能配置（需先安装插件，配置后重启会话）：
 
 ```
 /feishu-channel-configure <appId> <appSecret>
 ```
 
-凭证写入 `~/.claude/channels/feishu/.env`。
+凭证写入 `~/.claude/channels/feishu/.env`。服务器启动时读取，优先级高于环境变量。
 
 国际版（Lark）额外设置：
 
@@ -256,6 +256,7 @@ grep 'sandbox-' ~/.claude/channels/feishu/logs/latest
 
 | 症状 | 原因 | 修复 |
 |------|------|------|
+| MCP 连接失败（feishu-channel 红色） | 凭证未配置 | 先配置凭证（见上方"配置凭证"），再重启会话。`/feishu-channel-doctor` 可诊断 |
 | 消息发出但无回复 | 多个 bun 进程抢 WebSocket | 运行 `/feishu-channel-doctor` 排查，kill 旧进程 |
 | gate: dropped | 发送者不在白名单 | `/feishu-channel-access pair <code>` 配对 |
 | WebSocket 连接失败 | 凭证错误或网络问题 | `/feishu-channel-configure` 检查凭证 |
