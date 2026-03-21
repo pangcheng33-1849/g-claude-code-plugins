@@ -1,0 +1,10 @@
+{
+  "name": "feishu-channel-sandbox",
+  "description": "Optional sandbox for feishu-channel — restricts file read/write and bash commands to allowed directories when Claude is accessed via Feishu.",
+  "version": "0.1.0",
+  "author": {
+    "name": "cheng-pang"
+  },
+  "license": "MIT",
+  "keywords": ["feishu", "sandbox", "security", "hooks"]
+}
