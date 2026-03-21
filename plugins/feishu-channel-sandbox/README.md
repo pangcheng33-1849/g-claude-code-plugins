@@ -14,7 +14,7 @@
 
 - 配置文件缺失时**阻止所有操作**（而非放行）
 - 文件路径经过 `realpath` **规范化**后再比较，防止 `../` 遍历和符号链接逃逸
-- Bash 命令使用**白名单**（而非黑名单），只允许明确列出的命令前缀
+- Bash 命令使用**白名单**（而非黑名单），支持前缀匹配和 glob 模式匹配
 - **子 shell 构造被拒绝**：`$()`、`` ` ``、`<()`、`>()` 直接阻止，防止通过命令替换执行任意命令
 - **管道/链式命令逐段校验**：`|`、`&&`、`||`、`;` 拆分后每段都必须在白名单内，防止 `echo ... | sh` 等绕过
 - Bash 命令中出现的**文件路径也会被检查**，防止通过 `cat`、`ls` 等白名单命令访问受限路径
@@ -47,11 +47,13 @@
 2. 检测 `$()`、`` ` ``、`<()`、`>()` 子 shell 构造 → 直接阻止
 3. 按 `|`、`&&`、`||`、`;`、换行符拆分为多个命令段
 
-**第 2 层：每段命令前缀白名单**
+**第 2 层：每段命令 glob 白名单**
 
 1. 对每个拆分出的命令段，去除首尾空白
-2. 对比 `sandbox-bash.conf` 白名单（命令前缀匹配）
+2. 对比 `sandbox-bash.conf` 白名单：无 glob 字符的行做前缀匹配，含 `*`/`?`/`[` 的行做 bash glob 匹配
 3. 任一段不在白名单内则阻止（exit 2）
+
+glob 匹配对齐 Claude Code 的 allow 机制风格，`*` 匹配任意字符（含 `/` 和空格）。例如 `python3 /*/.claude/skills/*.py` 允许执行 skill 目录下的 `.py` 脚本，但天然阻止 `python3 -c "..."` 等注入（因为 `-c` 不以 `/` 开头）。
 
 这防止了 `echo "payload" | sh`、`ls -la; rm -rf /` 等通过管道或链式命令绕过白名单的方式。
 
@@ -100,10 +102,17 @@ grep 'sandbox-' ~/.claude/channels/feishu/logs/latest
 
 ```
 ~/.claude/channels/feishu    # 频道配置
-/tmp                          # 临时文件
+~/.claude/plugins            # 插件缓存
+*/.claude/skills             # 项目级 skill（glob 匹配任意祖先）
+*/.claude/skills/*
+*/.claude/commands           # 项目级命令
+*/.claude/commands/*
+*/.claude/agents             # 项目级 agent
+*/.claude/agents/*
+/tmp                         # 临时文件
 ```
 
-加上 Claude 工作目录（自动检测，无需配置）。每行一个路径，支持 `~`，`#` 开头为注释。
+加上 Claude 工作目录（自动检测，无需配置）。每行一个路径，支持 `~` 和 glob 模式（含 `*` 的行用 glob 匹配），`#` 开头为注释。
 
 此白名单同时被 sandbox-file.sh 和 sandbox-bash.sh 的路径检查共用。
 
@@ -121,7 +130,9 @@ grep 'sandbox-' ~/.claude/channels/feishu/logs/latest
 | Git 只读 | `git status`, `git log`, `git diff`, `git show`, `git branch` |
 | 版本查询 | `node --version`, `python3 --version`, `bun --version` |
 | 包信息 | `npm list`, `npm info`, `pip list`, `pip show` |
+| 目录创建 | `mkdir`（受路径白名单约束） |
 | 配置集管理 | `ln -sf ~/.claude/channels/feishu/...`, `readlink`, `cp ~/.claude/channels/feishu/profiles/...`, `rm ~/.claude/channels/feishu/profiles/...` |
+| 脚本执行 | `python3 *.py`, `node *.js`, `bash *.sh`, `bun *.[jt]s`（仅限 `~/.claude/plugins/` 和 `*/.claude/skills/` 目录，glob 限定扩展名） |
 
 所有命令都受路径检查约束，只能操作白名单路径内的文件。需要更多命令时可创建自定义配置集。
 
