@@ -14,8 +14,9 @@ bash tests/test-sandbox.sh
 `test-sandbox.sh` 分三部分：
 
 1. **安全机制测试**（default profile 下运行）— 验证三层检查和路径边界
-2. **DEFAULT profile 行为测试** — 验证只读命令放行、写入命令阻止
-3. **DEV profile 行为测试** — 验证开发命令放行、安全机制仍生效
+2. **glob 路径和扩展名匹配测试** — 验证 glob 模式精确匹配（`.py`/`.js`/`.sh`/`.ts`）和注入防护
+3. **DEFAULT profile 行为测试** — 验证只读命令放行、写入命令阻止、scoped 脚本执行
+4. **DEV profile 行为测试** — 验证开发命令放行、安全机制仍生效
 
 通过 `switch_profile default/dev` 切换配置集（从 `skills/sandbox-profile/profiles/` 目录复制配置文件）。
 
