@@ -60,14 +60,11 @@ expand_home() {
 # 兼容性：优先 realpath（Linux），回退 python3（macOS），最后原样返回
 canonicalize() {
   local p="$1"
-  if command -v realpath &>/dev/null; then
-    realpath -m "$p" 2>/dev/null || echo "$p"
-  elif command -v readlink &>/dev/null; then
-    # macOS 的 readlink 不支持 -m，用 python3 作为后备
-    python3 -c "import os,sys; print(os.path.realpath(sys.argv[1]))" "$p" 2>/dev/null || echo "$p"
-  else
-    echo "$p"
-  fi
+  local result
+  # 优先尝试 GNU realpath -m（支持不存在的路径）
+  result=$(realpath -m "$p" 2>/dev/null) && { echo "$result"; return; }
+  # macOS 的 realpath 不支持 -m，回退到 python3
+  python3 -c "import os,sys; print(os.path.realpath(sys.argv[1]))" "$p" 2>/dev/null || echo "$p"
 }
 
 # 对输入路径进行展开和规范化
@@ -78,7 +75,7 @@ FILE_PATH_CANONICAL=$(canonicalize "$(expand_home "$FILE_PATH")")
 # cwd 也需要规范化，防止 cwd 本身包含符号链接
 if [[ -n "$CWD" ]]; then
   CWD_CANONICAL=$(canonicalize "$CWD")
-  if [[ "$FILE_PATH_CANONICAL" == "$CWD_CANONICAL"* ]]; then
+  if [[ "$FILE_PATH_CANONICAL" == "$CWD_CANONICAL" || "$FILE_PATH_CANONICAL" == "$CWD_CANONICAL/"* ]]; then
     log_sandbox "ALLOW path=$FILE_PATH_CANONICAL (cwd)"
     exit 0
   fi
@@ -92,7 +89,7 @@ while IFS= read -r line; do
 
   # 去除首尾空白（xargs），展开 ~，规范化路径
   ALLOWED_CANONICAL=$(canonicalize "$(expand_home "$(echo "$line" | xargs)")")
-  if [[ "$FILE_PATH_CANONICAL" == "$ALLOWED_CANONICAL"* ]]; then
+  if [[ "$FILE_PATH_CANONICAL" == "$ALLOWED_CANONICAL" || "$FILE_PATH_CANONICAL" == "$ALLOWED_CANONICAL/"* ]]; then
     log_sandbox "ALLOW path=$FILE_PATH_CANONICAL"
     exit 0  # 匹配白名单，放行
   fi

@@ -6,5 +6,6 @@
     "name": "cheng-pang"
   },
   "license": "MIT",
-  "keywords": ["feishu", "sandbox", "security", "hooks"]
+  "keywords": ["feishu", "sandbox", "security", "hooks"],
+  "skills": "./skills"
 }

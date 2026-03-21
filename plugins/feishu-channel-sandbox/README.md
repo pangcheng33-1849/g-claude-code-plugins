@@ -15,7 +15,10 @@
 - 配置文件缺失时**阻止所有操作**（而非放行）
 - 文件路径经过 `realpath` **规范化**后再比较，防止 `../` 遍历和符号链接逃逸
 - Bash 命令使用**白名单**（而非黑名单），只允许明确列出的命令前缀
+- **子 shell 构造被拒绝**：`$()`、`` ` ``、`<()`、`>()` 直接阻止，防止通过命令替换执行任意命令
+- **管道/链式命令逐段校验**：`|`、`&&`、`||`、`;` 拆分后每段都必须在白名单内，防止 `echo ... | sh` 等绕过
 - Bash 命令中出现的**文件路径也会被检查**，防止通过 `cat`、`ls` 等白名单命令访问受限路径
+- 路径前缀匹配包含**目录边界检查**，`/tmp` 允许 `/tmp/foo` 但不允许 `/tmpevil`
 
 **注意**：此沙盒是应用层防护，非 OS 级隔离。对于高安全场景，建议配合 Docker 或 macOS sandbox-exec 使用。
 
@@ -34,19 +37,27 @@
 5. 配置文件缺失时阻止所有文件操作
 6. 所有 ALLOW/BLOCK 操作写入会话日志
 
-### sandbox-bash.sh — 命令执行控制（两层检查）
+### sandbox-bash.sh — 命令执行控制（三层检查）
 
-拦截 **Bash** 工具调用，执行两层安全检查：
+拦截 **Bash** 工具调用，执行三层安全检查：
 
-**第 1 层：命令前缀白名单**
+**第 1 层：命令拆分 + 子 shell 检测**
 
-1. 提取 `command` 内容
+1. 引号感知地解析命令字符串
+2. 检测 `$()`、`` ` ``、`<()`、`>()` 子 shell 构造 → 直接阻止
+3. 按 `|`、`&&`、`||`、`;`、换行符拆分为多个命令段
+
+**第 2 层：每段命令前缀白名单**
+
+1. 对每个拆分出的命令段，去除首尾空白
 2. 对比 `sandbox-bash.conf` 白名单（命令前缀匹配）
-3. 不在白名单内则阻止（exit 2）
+3. 任一段不在白名单内则阻止（exit 2）
 
-**第 2 层：命令中的路径检查**
+这防止了 `echo "payload" | sh`、`ls -la; rm -rf /` 等通过管道或链式命令绕过白名单的方式。
 
-即使命令前缀在白名单中，还会从命令字符串中提取所有路径形式的子串（绝对路径 `/...`、主目录相对 `~/...`、上级遍历 `../...`），对每个路径做与 sandbox-file.sh 相同的白名单校验。
+**第 3 层：命令中的路径检查**
+
+即使所有命令段都在白名单中，还会从命令字符串中提取所有路径形式的子串（绝对路径 `/...`、主目录相对 `~/...`、上级遍历 `../...`），对每个路径做与 sandbox-file.sh 相同的白名单校验。
 
 这防止了通过 `cat ~/secret.txt`、`ls ~/Downloads/`、`echo x > ~/private/file` 等方式绕过文件访问控制。`/dev/*` 路径始终放行（如 `/dev/null`）。
 
@@ -106,7 +117,44 @@ grep 'sandbox-' ~/.claude/channels/feishu/logs/latest
 | 版本查询 | `node --version`, `python3 --version`, `bun --version` |
 | 包信息 | `npm list`, `npm info`, `pip list`, `pip show` |
 
-所有命令都受第 2 层路径检查约束，只能操作白名单路径内的文件。需要更多命令时编辑 `sandbox-bash.conf` 添加对应前缀。
+所有命令都受第 2 层路径检查约束，只能操作白名单路径内的文件。需要更多命令时编辑 `sandbox-bash.conf` 添加对应前缀，或切换到 dev 配置集。
+
+## 配置集（Profiles）
+
+提供两个预设配置集，通过 skill 一键切换：
+
+```
+/feishu-channel-sandbox-profile          # 查看当前配置集
+/feishu-channel-sandbox-profile dev      # 切换到开发模式
+/feishu-channel-sandbox-profile default  # 恢复只读模式
+```
+
+### default — 只读模式（默认）
+
+仅允许只读/信息查询类命令，适合日常飞书对话场景。
+
+### dev — 开发模式
+
+在 default 基础上新增完整开发命令，覆盖前端、后端、iOS、Android 全栈开发：
+
+| 类型 | 新增命令 |
+|------|------|
+| Git 完整 | `git`（所有子命令） |
+| 文件操作 | `mkdir`, `cp`, `mv`, `rm`, `touch`, `chmod`, `ln`, `tar`, `zip`, `unzip` |
+| 前端 | `npm`, `npx`, `bun`, `bunx`, `pnpm`, `yarn`, `vite`, `webpack`, `tsc`, `eslint`, `prettier` |
+| 后端 | `pip`, `cargo`, `go`, `mvn`, `gradle`, `dotnet`, `composer`, `gem`, `bundle` |
+| iOS | `xcodebuild`, `xcrun`, `swift`, `pod`, `simctl`, `codesign` |
+| Android | `adb`, `sdkmanager`, `emulator`, `aapt`, `apksigner`, `./gradlew` |
+| 构建 | `make`, `cmake`, `ninja`, `bazel` |
+| 运行时 | `node`, `python3`, `deno`, `ruby`, `java`, `rustc`, `kotlin` |
+| 网络 | `curl`, `wget` |
+| 工具 | `docker`, `gh`, `kill`, `lsof` |
+
+dev 模式同时扩展路径白名单：新增 `/usr/local`、`~/.npm`、`~/.bun`、`~/.cargo`、`~/.ssh` 等开发常用路径。
+
+**所有命令仍受路径白名单约束**，只能操作项目目录和已授权路径。
+
+配置集文件也存放在插件的 `profiles/` 目录下供参考。
 
 ## 禁用
 
