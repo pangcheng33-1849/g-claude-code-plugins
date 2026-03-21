@@ -44,7 +44,28 @@ Version is stored in two places — both must be updated together when bumping:
 - `plugins/<name>/.claude-plugin/plugin.json` → `"version"`
 - `.claude-plugin/marketplace.json` → the matching plugin entry's `"version"`
 
-Current versions: `g-feishu` = 1.3.0, `example-plugin` = 1.0.0, `xhs-research` = 1.0.0.
+Current versions: `g-feishu` = 1.3.0, `feishu-channel` = 1.0.0, `feishu-channel-sandbox` = 1.0.0, `example-plugin` = 1.0.0, `xhs-research` = 1.0.0.
+
+## Feishu Plugin Ecosystem
+
+Three plugins form a unified Feishu integration:
+
+- **g-feishu** — 8 skills for Feishu API operations (messages, docs, bitable, calendar, tasks, search)
+- **feishu-channel** — WebSocket bridge connecting Claude Code to Feishu (chat, access control, pairing auth)
+- **feishu-channel-sandbox** — Optional security sandbox for feishu-channel (file/command whitelisting via PreToolUse hooks)
+
+## feishu-channel-sandbox Architecture
+
+Three-layer Bash command check: subshell detection → glob pattern whitelist → path whitelist. File access controlled by separate path whitelist.
+
+Key files:
+- `hooks/sandbox-bash.sh` — command validation (glob matching, subshell blocking, path extraction)
+- `hooks/sandbox-file.sh` — file path validation
+- `hooks/setup.sh` — SessionStart initialization (profile sync, symlink creation)
+- `skills/sandbox-profile/` — profile management skill (default/dev/custom switching)
+- `skills/sandbox-profile/profiles/` — config files (`{name}-bash.conf` + `{name}-sandbox.conf`)
+
+Config syntax: lines without glob chars (`*`, `?`, `[`) → prefix match; lines with glob chars → bash `[[ == $PATTERN ]]` glob match. `~` expanded to `$HOME` before matching.
 
 ## g-feishu Plugin Architecture
 
