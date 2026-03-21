@@ -87,6 +87,16 @@ source ~/.zshrc
 - 真实 API 执行、结构化输入输出、稳定命令入口，交给 `scripts/`。
 - 跨 skill 协作统一通过 skill 名，不做跨 skill 的代码级 import。
 
+## 搭配 feishu-channel 使用
+
+[feishu-channel](../feishu-channel) 插件可以将 Claude Code 连接到飞书，让你在飞书私聊或群组中直接与 Claude 对话。安装 feishu-channel 后，Claude 会自动识别并使用 g-feishu 的 skills 来完成飞书相关任务（如发消息、建文档、查日程等）。
+
+```bash
+/plugin install feishu-channel@g-claude-code-plugins
+```
+
+如需限制通过飞书访问时的操作范围，可加装 [feishu-channel-sandbox](../feishu-channel-sandbox)。
+
 ## 迁移与发布
 
 - 发布时保留这个目录即可。
