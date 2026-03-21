@@ -63,9 +63,6 @@ def resolve_attendee_open_ids(*, args: argparse.Namespace, token: str, auth_mode
         return []
 
     search_tokens: list[str] = [token]
-    env_user = os.environ.get("MY_LARK_USER_ACCESS_TOKEN", "").strip()
-    if env_user and env_user not in search_tokens:
-        search_tokens.append(env_user)
 
     resolved: list[str] = []
     for query in query_candidates:
@@ -106,15 +103,15 @@ def resolve_user_visible_app_link(
     *,
     event_id: str,
     attendee_open_ids: list[str],
+    user_access_token: str | None = None,
 ) -> tuple[str | None, dict[str, object] | None]:
-    env_user_token = os.environ.get("MY_LARK_USER_ACCESS_TOKEN", "").strip()
-    if not env_user_token:
-        return None, {"reason": "MY_LARK_USER_ACCESS_TOKEN is not set."}
+    if not user_access_token:
+        return None, {"reason": "No user access token provided. Pass --user-access-token to enable user-visible link resolution."}
 
     calendars_response = calendar_request(
         method="GET",
         path="/calendar/v4/calendars",
-        token=env_user_token,
+        token=user_access_token,
         query={"page_size": 50},
     )
     if calendars_response.get("code") != 0:
@@ -125,13 +122,13 @@ def resolve_user_visible_app_link(
     calendar_list = calendars_response.get("data", {}).get("calendar_list", [])
     user_calendar = next((item for item in calendar_list if item.get("type") == "primary"), None) or (calendar_list[0] if calendar_list else None)
     if not user_calendar or not user_calendar.get("calendar_id"):
-        return None, {"reason": "No user-visible calendar found for MY_LARK_USER_ACCESS_TOKEN."}
+        return None, {"reason": "No user-visible calendar found for the provided user access token."}
 
     calendar_id = str(user_calendar["calendar_id"])
     response = calendar_request(
         method="GET",
         path=f"/calendar/v4/calendars/{urllib.parse.quote(calendar_id, safe='')}/events/{urllib.parse.quote(event_id, safe='')}",
-        token=env_user_token,
+        token=user_access_token,
     )
     if response.get("code") != 0:
         return None, {
@@ -256,6 +253,7 @@ def cmd_create_event(args: argparse.Namespace) -> None:
         user_visible_app_link, user_visible_app_link_meta = resolve_user_visible_app_link(
             event_id=str(event.get("event_id")),
             attendee_open_ids=attendee_open_ids,
+            user_access_token=args.user_access_token,
         )
         if user_visible_app_link:
             preferred_app_link = user_visible_app_link

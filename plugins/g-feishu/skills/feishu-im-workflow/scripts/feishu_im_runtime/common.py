@@ -128,13 +128,10 @@ def resolve_token(
 ) -> tuple[str, str]:
     if tenant_access_token:
         return tenant_access_token, "argument_tenant_access_token"
-    env_tenant = os.environ.get("MY_LARK_TENANT_ACCESS_TOKEN")
-    if env_tenant:
-        return env_tenant, "environment_MY_LARK_TENANT_ACCESS_TOKEN"
     fail(
-        f"{command_name} requires a tenant token. Pass --tenant-access-token, "
-        "or set MY_LARK_TENANT_ACCESS_TOKEN. "
-        "Use Agent Skill g-feishu-auth-and-scopes to obtain or refresh a tenant token first."
+        f"{command_name} requires a tenant token. "
+        "Use skill feishu-auth-and-scopes to resolve a tenant token, "
+        "then pass it via --tenant-access-token."
     )
 
 
@@ -280,7 +277,11 @@ def find_message_in_chat(*, token: str, chat_id: str, message_id: str, auth_mode
 
 
 def add_token_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--tenant-access-token", help="Explicit tenant_access_token.")
+    parser.add_argument(
+        "--tenant-access-token",
+        required=True,
+        help="Tenant access token (required). Use skill feishu-auth-and-scopes to obtain.",
+    )
 
 
 def add_message_content_args(parser: argparse.ArgumentParser) -> None:

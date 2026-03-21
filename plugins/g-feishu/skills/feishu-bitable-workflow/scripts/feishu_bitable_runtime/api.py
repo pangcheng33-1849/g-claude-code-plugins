@@ -41,31 +41,15 @@ def resolve_token(
     *,
     user_access_token: str | None,
     tenant_access_token: str | None,
-    use_tenant_token: bool,
     command_name: str,
 ) -> tuple[str, str]:
     if user_access_token:
         return user_access_token, "argument_user_access_token"
     if tenant_access_token:
         return tenant_access_token, "argument_tenant_access_token"
-    if use_tenant_token:
-        env_tenant = os.environ.get("MY_LARK_TENANT_ACCESS_TOKEN")
-        if env_tenant:
-            return env_tenant, "environment_MY_LARK_TENANT_ACCESS_TOKEN"
-        fail(
-            f"{command_name} requested tenant mode, but no tenant token was provided. "
-            "Pass --tenant-access-token or set MY_LARK_TENANT_ACCESS_TOKEN."
-        )
-    env_user = os.environ.get("MY_LARK_USER_ACCESS_TOKEN")
-    if env_user:
-        return env_user, "environment_MY_LARK_USER_ACCESS_TOKEN"
-    env_tenant = os.environ.get("MY_LARK_TENANT_ACCESS_TOKEN")
-    if env_tenant:
-        return env_tenant, "environment_MY_LARK_TENANT_ACCESS_TOKEN"
     fail(
-        f"{command_name} requires a Feishu token. Pass --user-access-token / --tenant-access-token, "
-        "or set MY_LARK_USER_ACCESS_TOKEN / MY_LARK_TENANT_ACCESS_TOKEN. "
-        "Use Agent Skill feishu-auth-and-scopes to obtain or refresh a token first."
+        f"{command_name} requires a Feishu token. Pass --user-access-token or --tenant-access-token. "
+        "Use skill feishu-auth-and-scopes resolve-token to obtain a token first."
     )
 
 

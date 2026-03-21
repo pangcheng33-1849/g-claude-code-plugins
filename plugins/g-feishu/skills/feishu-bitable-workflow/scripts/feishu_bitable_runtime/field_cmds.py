@@ -14,7 +14,7 @@ def cmd_create_field(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="create-field",
     )
     field_type = resolve_field_type(args.type)
@@ -48,7 +48,7 @@ def cmd_list_fields(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="list-fields",
     )
     response = request_json(
@@ -80,7 +80,7 @@ def cmd_update_field(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="update-field",
     )
     field_type_input = resolve_field_type(args.type)
@@ -129,7 +129,7 @@ def cmd_delete_field(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="delete-field",
     )
     response = request_json(

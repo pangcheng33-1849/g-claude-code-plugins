@@ -375,7 +375,7 @@ def resolve_token_payload(
     )
     payload = summarize_token_record(record, include_secrets=include_secrets)
     payload["resolved_identity"] = "user"
-    payload["cache_path"] = path
+    # cache_path intentionally omitted from output
     if include_secrets:
         payload["access_token"] = record.get("access_token")
         payload["refresh_token"] = record.get("refresh_token")

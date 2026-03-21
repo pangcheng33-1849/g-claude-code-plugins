@@ -13,7 +13,7 @@ def cmd_get_view(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="get-view",
     )
     response = request_json(
@@ -39,7 +39,7 @@ def cmd_list_views(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="list-views",
     )
     response = request_json(
@@ -67,7 +67,7 @@ def cmd_create_view(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="create-view",
     )
     response = create_view_raw(
@@ -95,7 +95,7 @@ def cmd_update_view(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="update-view",
     )
     if not args.view_name:
@@ -124,7 +124,7 @@ def cmd_delete_view(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="delete-view",
     )
     response = request_json(

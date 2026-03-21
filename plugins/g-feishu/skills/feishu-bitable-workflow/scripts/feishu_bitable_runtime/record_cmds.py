@@ -41,7 +41,7 @@ def cmd_create_record(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="create-record",
     )
     schema_map = load_table_schema_map(token=token, auth_mode=auth_mode, app_token=args.app_token, table_id=args.table_id)
@@ -74,7 +74,7 @@ def cmd_list_records(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="list-records",
     )
     schema_map = load_table_schema_map(token=token, auth_mode=auth_mode, app_token=args.app_token, table_id=args.table_id)
@@ -125,7 +125,7 @@ def cmd_update_record(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="update-record",
     )
     schema_map = load_table_schema_map(token=token, auth_mode=auth_mode, app_token=args.app_token, table_id=args.table_id)
@@ -158,7 +158,7 @@ def cmd_delete_record(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="delete-record",
     )
     response = request_json(
@@ -184,7 +184,7 @@ def cmd_batch_create_records(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="batch-create-records",
     )
     schema_map = load_table_schema_map(token=token, auth_mode=auth_mode, app_token=args.app_token, table_id=args.table_id)
@@ -218,7 +218,7 @@ def cmd_batch_update_records(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="batch-update-records",
     )
     schema_map = load_table_schema_map(token=token, auth_mode=auth_mode, app_token=args.app_token, table_id=args.table_id)
@@ -252,7 +252,7 @@ def cmd_batch_delete_records(args: argparse.Namespace) -> None:
     token, auth_mode = resolve_token(
         user_access_token=args.user_access_token,
         tenant_access_token=args.tenant_access_token,
-        use_tenant_token=args.use_tenant_token,
+
         command_name="batch-delete-records",
     )
     record_ids = load_string_list(args.record_ids, args.record_ids_json, args.record_ids_file, name="record_ids")

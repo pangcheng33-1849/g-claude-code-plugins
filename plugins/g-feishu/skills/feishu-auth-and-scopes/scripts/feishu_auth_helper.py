@@ -89,8 +89,6 @@ def build_parser() -> argparse.ArgumentParser:
     resolve_token.add_argument("--open-browser", action="store_true", help="Open the verification URL in the default browser when using device auth.")
     resolve_token.add_argument("--scopes", nargs="*", default=[], help="Requested scopes when device auth is needed.")
     resolve_token.add_argument("--cache-key", help="Optional cache key when one app uses multiple token profiles.")
-    resolve_token.add_argument("--include-secrets", action="store_true", help="Include access_token and refresh_token in the JSON output.")
-    resolve_token.add_argument("--print-access-token", action="store_true", help="Print only the raw access token.")
     resolve_token.set_defaults(func=cmd_resolve_token)
 
     show_token_meta = subparsers.add_parser("show-token-meta", help="Show cached user token metadata without re-authorizing.")

@@ -42,13 +42,9 @@ from feishu_bitable_runtime.field_record_view_cmds import (
 
 
 def add_auth_arguments(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--user-access-token", help="User token. Preferred for all real Bitable operations.")
-    parser.add_argument("--tenant-access-token", help="Tenant token. Only use when you explicitly want app identity.")
-    parser.add_argument(
-        "--use-tenant-token",
-        action="store_true",
-        help="Prefer MY_LARK_TENANT_ACCESS_TOKEN from the environment instead of the default user-token-first behavior.",
-    )
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--user-access-token", help="User access token. Use skill feishu-auth-and-scopes to obtain.")
+    group.add_argument("--tenant-access-token", help="Tenant access token. Use skill feishu-auth-and-scopes to obtain.")
 
 
 def add_field_property_arguments(parser: argparse.ArgumentParser) -> None:

@@ -21,17 +21,19 @@ description: 当用户提出“创建飞书多维表格”“创建或修改 bit
 ## 1. 权限与默认行为
 
 - 本 skill 已经是**真实 Bitable workflow**，不再只是 schema 草案或 payload 生成器。
-- 默认 **user token 优先**。真实 Bitable 读写默认先使用内部 user token 运行时变量。
-- 只有用户明确要求应用身份，或已知 app 对目标 base/table 有权限时，才切到 tenant token：
-  - `--tenant-access-token`
-  - `--use-tenant-token`
-- 所有鉴权、scope、token 获取与刷新，都统一交给 Agent Skill `feishu-auth-and-scopes`。
-- 如果 Bitable API 已经报错，但还不清楚是 app token、table id、field payload 还是权限问题，统一切到 Agent Skill `feishu-api-diagnose`。
+- **所有命令在调用前必须先获取 token**。典型流程：
+  1. 使用 skill `feishu-auth-and-scopes` 的 `resolve-token` 命令获取 token
+  2. 从返回的 JSON 中提取 `access_token`
+  3. 通过 `--user-access-token` 或 `--tenant-access-token` 参数传入
+- 默认 **user token 优先**。只有用户明确要求应用身份，或已知 app 对目标 base/table 有权限时，才使用 `--tenant-access-token`。
+- 所有鉴权、scope、token 获取与刷新，都统一交给 skill `feishu-auth-and-scopes`。
+- 如果 Bitable API 已经报错，但还不清楚是 app token、table id、field payload 还是权限问题，统一切到 skill `feishu-api-diagnose`。
 
 ### 1.1 首次真实写操作
 
 首次真实写操作建议先确认：
 
+- 已通过 skill `feishu-auth-and-scopes` 获取到有效的 access token
 - 本次要操作的目标：
   - `app_token`
   - `table_id`

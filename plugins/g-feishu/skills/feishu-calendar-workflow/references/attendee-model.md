@@ -27,7 +27,7 @@
   - 会先尝试解析默认参会人
   - 解析不到时直接报错
   - 解析到后，创建事件成功即调用 attendee API 追加参会人
-  - 然后优先尝试用 `MY_LARK_USER_ACCESS_TOKEN` 读取参会人视角事件，并返回 `preferred_app_link`
+  - 然后如果同时传了 `--user-access-token`，会尝试用它读取参会人视角事件，并返回 `preferred_app_link`
   - 如果参会人视角读取失败，则回退到 organizer `app_link`
 - attendee API 默认也会带：
   - `need_notification = true`

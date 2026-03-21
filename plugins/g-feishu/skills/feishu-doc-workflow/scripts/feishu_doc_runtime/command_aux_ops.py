@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import pathlib
 
 from .common import (
@@ -234,13 +233,11 @@ def resolve_comment_bearer_token(args: argparse.Namespace) -> tuple[str, str]:
             tenant_access_token=None,
             use_tenant_token=False,
         )
-    tenant_env = os.getenv("MY_LARK_TENANT_ACCESS_TOKEN")
-    if tenant_env:
-        return tenant_env, "environment_MY_LARK_TENANT_ACCESS_TOKEN"
+    # Comments default to tenant token; require explicit --tenant-access-token
     return resolve_bearer_token(
         user_access_token=None,
-        tenant_access_token=None,
-        use_tenant_token=False,
+        tenant_access_token=args.tenant_access_token,
+        use_tenant_token=True,
     )
 
 

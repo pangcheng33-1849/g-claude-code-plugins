@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -31,24 +30,14 @@ def resolve_token(
     if tenant_access_token:
         return tenant_access_token, "argument_tenant_access_token"
     if use_tenant_token:
-        env_tenant = os.environ.get("MY_LARK_TENANT_ACCESS_TOKEN")
-        if env_tenant:
-            return env_tenant, "environment_MY_LARK_TENANT_ACCESS_TOKEN"
         fail(
             f"{command_name} requested tenant mode, but no tenant token was provided. "
-            "Pass --tenant-access-token or set MY_LARK_TENANT_ACCESS_TOKEN."
+            "Pass --tenant-access-token explicitly. "
+            "Use skill feishu-auth-and-scopes to obtain a token first."
         )
-    env_user = os.environ.get("MY_LARK_USER_ACCESS_TOKEN")
-    if env_user:
-        return env_user, "environment_MY_LARK_USER_ACCESS_TOKEN"
-    if allow_tenant:
-        env_tenant = os.environ.get("MY_LARK_TENANT_ACCESS_TOKEN")
-        if env_tenant:
-            return env_tenant, "environment_MY_LARK_TENANT_ACCESS_TOKEN"
     fail(
-        f"{command_name} requires a Feishu token. Pass --user-access-token / --tenant-access-token, "
-        "or set MY_LARK_USER_ACCESS_TOKEN / MY_LARK_TENANT_ACCESS_TOKEN. "
-        "Use Agent Skill feishu-auth-and-scopes to obtain or refresh a token first."
+        f"{command_name} requires a Feishu token. Pass --user-access-token or --tenant-access-token. "
+        "Use skill feishu-auth-and-scopes to obtain or refresh a token first."
     )
 
 
@@ -167,9 +156,9 @@ def summarize_task(task: dict[str, object] | None) -> dict[str, object]:
 
 
 def add_token_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--user-access-token", help="Explicit user access token.")
-    parser.add_argument("--tenant-access-token", help="Explicit tenant access token.")
-    parser.add_argument("--use-tenant-token", action="store_true", help="Prefer tenant token from argument or environment.")
+    parser.add_argument("--user-access-token", help="User access token. Use skill feishu-auth-and-scopes to obtain.")
+    parser.add_argument("--tenant-access-token", help="Tenant access token. Use skill feishu-auth-and-scopes to obtain.")
+    parser.add_argument("--use-tenant-token", action="store_true", help="Prefer tenant token from --tenant-access-token.")
     parser.add_argument(
         "--user-id-type",
         choices=sorted(USER_ID_TYPES),

@@ -131,7 +131,7 @@ def cmd_auth_user(args: argparse.Namespace, parser: argparse.ArgumentParser) -> 
         open_browser=args.open_browser,
     )
     payload = summarize_token_record(record, include_secrets=args.include_secrets)
-    payload["cache_path"] = path
+    # cache_path intentionally omitted — callers should use --print-access-token
     payload["message"] = "User access token has been cached locally."
     if args.include_secrets:
         payload["access_token"] = record.get("access_token")
@@ -179,7 +179,6 @@ def cmd_resolve_token(args: argparse.Namespace, parser: argparse.ArgumentParser)
     if args.identity == "user":
         require_app_id(args, parser)
         require_app_secret(args, parser)
-    include_secrets = args.include_secrets or args.print_access_token
     payload = resolve_token_payload(
         identity=args.identity,
         app_id=args.app_id,
@@ -190,9 +189,9 @@ def cmd_resolve_token(args: argparse.Namespace, parser: argparse.ArgumentParser)
         allow_device_auth=args.device_auth,
         open_browser=args.open_browser,
         scopes=args.scopes,
-        include_secrets=include_secrets,
+        include_secrets=True,
     )
-    emit_token_output(payload, include_secrets=include_secrets, print_access_token=args.print_access_token)
+    print_json(payload)
 
 
 def cmd_show_token_meta(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
