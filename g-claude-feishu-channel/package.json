@@ -9,12 +9,21 @@
     "bin/",
     "profiles/"
   ],
-  "keywords": ["claude-code", "feishu", "lark", "sandbox", "security"],
+  "keywords": [
+    "claude-code",
+    "feishu",
+    "lark",
+    "sandbox",
+    "security"
+  ],
   "author": "cheng-pang",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/pangcheng1849/g-claude-code-plugins",
     "directory": "g-claude-feishu-channel"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.1.0"
   }
 }
