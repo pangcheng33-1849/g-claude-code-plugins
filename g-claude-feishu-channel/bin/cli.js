@@ -233,8 +233,30 @@ function cmdReset() {
     if (oldData) settings = removeProfileRules(settings, oldData);
     else delete settings.sandbox;
   } else {
-    // No active record — fallback: remove sandbox anyway
-    delete settings.sandbox;
+    // No active record — try matching sandbox config to a preset
+    let cleaned = false;
+    if (settings.sandbox) {
+      for (const preset of PRESETS) {
+        const p = path.join(PRESET_PROFILES_DIR, `${preset}.json`);
+        if (!fs.existsSync(p)) continue;
+        const data = loadJson(p);
+        if (data.sandbox && JSON.stringify(data.sandbox) === JSON.stringify(settings.sandbox)) {
+          settings = removeProfileRules(settings, data);
+          cleaned = true;
+          break;
+        }
+      }
+    }
+    if (!cleaned) {
+      // Can't match or no sandbox — force clean all sandbox-related config
+      delete settings.sandbox;
+      if (settings.permissions) {
+        delete settings.permissions.allow;
+        delete settings.permissions.deny;
+        delete settings.permissions.defaultMode;
+        if (Object.keys(settings.permissions).length === 0) delete settings.permissions;
+      }
+    }
   }
 
   saveJson(sp, settings);
