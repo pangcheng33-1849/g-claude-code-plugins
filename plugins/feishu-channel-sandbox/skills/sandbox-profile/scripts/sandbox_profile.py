@@ -84,9 +84,7 @@ def list_profiles() -> list[str]:
     return sorted(names)
 
 
-def settings_path(shared: bool) -> pathlib.Path:
-    if shared:
-        return pathlib.Path(".claude/settings.json")
+def settings_path() -> pathlib.Path:
     return pathlib.Path(".claude/settings.local.json")
 
 
@@ -207,8 +205,7 @@ def cmd_show(args: argparse.Namespace) -> None:
 def cmd_apply(args: argparse.Namespace) -> None:
     new_profile = load_profile(args.name)
     new_path = profile_path(args.name)
-    shared = getattr(args, "shared", False)
-    path = settings_path(shared)
+    path = settings_path()
     settings = load_json(path)
 
     # Step 1: Remove old profile's rules (load from stored absolute path)
@@ -247,8 +244,7 @@ def cmd_apply(args: argparse.Namespace) -> None:
 
 
 def cmd_reset(args: argparse.Namespace) -> None:
-    shared = getattr(args, "shared", False)
-    path = settings_path(shared)
+    path = settings_path()
     settings = load_json(path)
 
     old_name, old_abs_path = get_active_profile()
@@ -336,10 +332,8 @@ def main() -> None:
 
     apply_cmd = subparsers.add_parser("apply", help="Apply a profile to settings.")
     apply_cmd.add_argument("name", help="Profile name to apply.")
-    apply_cmd.add_argument("--shared", action="store_true", help="Write to .claude/settings.json instead of .local.")
 
     reset_cmd = subparsers.add_parser("reset", help="Remove sandbox config from settings.")
-    reset_cmd.add_argument("--shared", action="store_true", help="Reset .claude/settings.json instead of .local.")
 
     create_cmd = subparsers.add_parser("create", help="Create a custom profile.")
     create_cmd.add_argument("name", help="New profile name.")

@@ -23,8 +23,7 @@ cd <skill_base_dir> && python3 scripts/sandbox_profile.py <command> [args]
 |------|------|
 | `list` | 列出可用模板，显示当前激活的 profile 和 sandbox 配置 |
 | `show [name]` | 不带参数显示当前 sandbox 配置；带 name 显示指定模板内容 |
-| `apply <name>` | 应用模板（先删旧规则再加新规则），默认写 `.claude/settings.local.json` |
-| `apply <name> --shared` | 应用模板到 `.claude/settings.json`（团队共享） |
+| `apply <name>` | 应用模板（先删旧规则再加新规则），写入 `.claude/settings.local.json` |
 | `reset` | 移除当前 profile 的 sandbox/permissions 规则 |
 | `create <name> [base]` | 基于已有模板创建自定义模板（默认 base=dev） |
 | `delete <name>` | 删除自定义模板（预置模板不可删） |
