@@ -350,10 +350,22 @@ async function interactiveSandbox() {
 
   intro("🔒 Sandbox Profile Manager");
 
-  let firstLoop = true;
+  function waitForKey(prompt) {
+    return new Promise(resolve => {
+      log.info(prompt);
+      if (!process.stdin.isTTY) { resolve(); return; }
+      process.stdin.setRawMode(true);
+      process.stdin.resume();
+      process.stdin.once("data", () => {
+        process.stdin.setRawMode(false);
+        process.stdin.pause();
+        console.clear();
+        resolve();
+      });
+    });
+  }
+
   while (true) {
-    if (!firstLoop) console.clear();
-    firstLoop = false;
     const active = getActive();
     note(
       `Profile:  ${active.name || "(none)"}\nSettings: ${settingsPath()}`,
@@ -390,7 +402,7 @@ async function interactiveSandbox() {
 
     } else if (action === "show") {
       cmdShow();
-      log.info("Press Esc to go back...");
+      await waitForKey("Press any key to go back...");
       continue;
 
     } else if (action === "show-profile") {
@@ -405,7 +417,7 @@ async function interactiveSandbox() {
       });
       if (isCancel(name)) continue;
       cmdShow(name);
-      log.info("Press Esc to go back...");
+      await waitForKey("Press any key to go back...");
       continue;
 
     } else if (action === "reset") {
