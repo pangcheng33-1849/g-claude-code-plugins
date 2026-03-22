@@ -63,7 +63,11 @@ export MY_LARK_BRAND="lark"
 ### 4. 启动
 
 ```bash
+# 基础启动（每次操作需在终端手动授权）
 claude --dangerously-load-development-channels plugin:feishu-channel@g-claude-code-plugins
+
+# 推荐：跳过权限确认，适合信任环境
+claude --dangerously-skip-permissions --dangerously-load-development-channels plugin:feishu-channel@g-claude-code-plugins
 ```
 
 建议设置 alias：
@@ -71,6 +75,22 @@ claude --dangerously-load-development-channels plugin:feishu-channel@g-claude-co
 ```bash
 alias claude-feishu='claude --dangerously-skip-permissions --dangerously-load-development-channels plugin:feishu-channel@g-claude-code-plugins'
 ```
+
+> **权限提示**：如果不使用 `--dangerously-skip-permissions`，Claude 执行飞书技能时会频繁在终端弹出授权确认（每次调用脚本、读写文件都需要手动批准），体验较差。推荐方案：
+>
+> 1. **快速方案**：加 `--dangerously-skip-permissions` 跳过所有确认（如上 alias）
+> 2. **精细方案**：在 `settings.json` 中通过 `allow` 白名单 + `"permission": "dontAsk"` 配置常用操作的自动放行，例如：
+>    ```json
+>    {
+>      "permissions": {
+>        "allow": [
+>          "Bash(python3 */.claude/skills/*.py *)",
+>          "Bash(cd */.claude/skills/* && python3 *)",
+>          "Read(*/.claude/skills/*)"
+>        ]
+>      }
+>    }
+>    ```
 
 ### 5. 配对
 
