@@ -271,13 +271,106 @@ function cmdDelete(name) {
   }, null, 2));
 }
 
+// ── Interactive mode ──
+const readline = require("readline");
+
+const PROFILE_DESCRIPTIONS = {
+  "default": "安全模式（飞书频道日常使用）",
+  "dev": "开发模式（完整开发工具）",
+  "dangerously-open": "无限制（仅信任环境）",
+};
+
+function createRL() {
+  return readline.createInterface({ input: process.stdin, output: process.stdout });
+}
+
+function choose(rl, prompt, options) {
+  return new Promise((resolve) => {
+    console.log(`\n${prompt}\n`);
+    options.forEach((opt, i) => {
+      const marker = i === 0 ? "❯" : " ";
+      console.log(`  ${marker} ${i + 1}) ${opt.label}`);
+    });
+    console.log();
+    rl.question("Enter number: ", (answer) => {
+      const idx = parseInt(answer, 10) - 1;
+      if (idx >= 0 && idx < options.length) resolve(options[idx].value);
+      else { console.error("Invalid selection."); process.exit(1); }
+    });
+  });
+}
+
+function input(rl, prompt) {
+  return new Promise((resolve) => {
+    rl.question(prompt, (answer) => resolve(answer.trim()));
+  });
+}
+
+async function interactiveSandbox() {
+  const rl = createRL();
+  const active = getActive();
+
+  console.log("\n🔒 Sandbox Profile Manager\n");
+  console.log(`Current profile: ${active.name || "(none)"}`);
+  console.log(`Settings file:   ${settingsPath()}`);
+
+  const action = await choose(rl, "Select action:", [
+    { label: "Apply profile", value: "apply" },
+    { label: "Show current config", value: "show" },
+    { label: "Show a profile template", value: "show-profile" },
+    { label: "Reset (remove sandbox config)", value: "reset" },
+    { label: "Create custom profile", value: "create" },
+    { label: "Delete custom profile", value: "delete" },
+  ]);
+
+  if (action === "apply") {
+    const profiles = listProfiles();
+    const options = profiles.map(name => ({
+      label: `${name}${name === active.name ? " (active)" : ""}${PROFILE_DESCRIPTIONS[name] ? " — " + PROFILE_DESCRIPTIONS[name] : ""}`,
+      value: name,
+    }));
+    const name = await choose(rl, "Select profile to apply:", options);
+    rl.close();
+    cmdApply(name);
+  } else if (action === "show") {
+    rl.close();
+    cmdShow();
+  } else if (action === "show-profile") {
+    const profiles = listProfiles();
+    const options = profiles.map(name => ({ label: name, value: name }));
+    const name = await choose(rl, "Select profile to view:", options);
+    rl.close();
+    cmdShow(name);
+  } else if (action === "reset") {
+    rl.close();
+    cmdReset();
+  } else if (action === "create") {
+    const name = await input(rl, "New profile name: ");
+    if (!name) { console.error("Name required."); process.exit(1); }
+    const base = await input(rl, "Base profile (default: dev): ");
+    rl.close();
+    cmdCreate(name, base || "dev");
+  } else if (action === "delete") {
+    const customs = listProfiles().filter(n => !PRESETS.has(n));
+    if (customs.length === 0) { console.log("No custom profiles to delete."); rl.close(); return; }
+    const options = customs.map(name => ({ label: name, value: name }));
+    const name = await choose(rl, "Select custom profile to delete:", options);
+    rl.close();
+    cmdDelete(name);
+  }
+}
+
 // ── Main ──
 const args = process.argv.slice(2);
 const cmd = args[0];
 
 if (cmd === "sandbox") {
   const sub = args[1];
-  if (!sub || sub === "list") cmdList();
+  if (!sub) {
+    // No subcommand → interactive mode
+    interactiveSandbox().catch(e => { console.error(e); process.exit(1); });
+  }
+  else if (sub === "list") cmdList();
   else if (sub === "show") cmdShow(args[2]);
   else if (sub === "apply") { if (!args[2]) { console.error("Usage: sandbox apply <name>"); process.exit(1); } cmdApply(args[2]); }
   else if (sub === "reset") cmdReset();
@@ -288,12 +381,13 @@ if (cmd === "sandbox") {
   console.log(`g-claude-feishu-channel — CLI tools for feishu-channel
 
 Usage:
-  g-claude-feishu-channel sandbox list              List profiles and current config
-  g-claude-feishu-channel sandbox show [name]       Show current config or a profile
-  g-claude-feishu-channel sandbox apply <name>      Apply a sandbox profile
-  g-claude-feishu-channel sandbox reset             Remove sandbox configuration
-  g-claude-feishu-channel sandbox create <n> [base] Create custom profile
-  g-claude-feishu-channel sandbox delete <name>     Delete custom profile
+  g-claude-feishu-channel sandbox              Interactive sandbox profile manager
+  g-claude-feishu-channel sandbox list         List profiles and current config
+  g-claude-feishu-channel sandbox show [name]  Show current config or a profile
+  g-claude-feishu-channel sandbox apply <name> Apply a sandbox profile
+  g-claude-feishu-channel sandbox reset        Remove sandbox configuration
+  g-claude-feishu-channel sandbox create <n>   Create custom profile (base: dev)
+  g-claude-feishu-channel sandbox delete <n>   Delete custom profile
 
 Profiles: default, dev, dangerously-open`);
 } else {
