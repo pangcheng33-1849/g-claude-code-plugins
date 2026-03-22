@@ -444,6 +444,7 @@ async function interactiveSandbox() {
       return;
 
     } else if (action === "delete") {
+      const { confirm } = require("@clack/prompts");
       const customs = listProfiles().filter(n => !PRESETS.has(n));
       if (customs.length === 0) {
         log.warn("No custom profiles to delete.");
@@ -454,6 +455,26 @@ async function interactiveSandbox() {
         options: customs.map(n => ({ value: n, label: n })),
       });
       if (isCancel(name)) continue;
+
+      // Check if active in any projects
+      const affected = [];
+      if (fs.existsSync(ACTIVE_DIR)) {
+        for (const f of fs.readdirSync(ACTIVE_DIR)) {
+          if (!f.endsWith(".json")) continue;
+          const data = loadJson(path.join(ACTIVE_DIR, f));
+          if (data.profile === name) affected.push(data.project);
+        }
+      }
+
+      if (affected.length > 0) {
+        log.warn(`Profile '${name}' is active in ${affected.length} project(s):`);
+        for (const p of affected) log.warn(`  ${p}`);
+        const confirmed = await confirm({
+          message: `Delete and reset these projects?`,
+        });
+        if (isCancel(confirmed) || !confirmed) continue;
+      }
+
       cmdDelete(name, { force: true });
       outro(`Profile '${name}' deleted.`);
       return;
