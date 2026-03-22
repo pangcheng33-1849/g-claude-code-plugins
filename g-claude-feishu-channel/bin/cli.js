@@ -232,6 +232,9 @@ function cmdReset() {
     }
     if (oldData) settings = removeProfileRules(settings, oldData);
     else delete settings.sandbox;
+  } else {
+    // No active record — fallback: remove sandbox anyway
+    delete settings.sandbox;
   }
 
   saveJson(sp, settings);
