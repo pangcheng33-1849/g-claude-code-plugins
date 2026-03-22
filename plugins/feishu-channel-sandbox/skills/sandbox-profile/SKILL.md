@@ -54,7 +54,7 @@ cd <skill_base_dir> && python3 scripts/sandbox_profile.py <command> [args]
 
 ```
 ~/.claude/channels/feishu/sandbox-profile/
-└── active    # 纯文本，当前 profile 名（如 "default"）
+└── active    # 纯文本，内容为当前 profile JSON 的绝对路径
 ```
 
-不存在时表示未应用任何 profile。
+存储绝对路径确保插件版本更新后仍能找到旧 profile 文件进行精确规则删除。不存在时表示未应用任何 profile。

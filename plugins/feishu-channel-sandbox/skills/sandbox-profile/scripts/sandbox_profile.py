@@ -36,23 +36,32 @@ def save_json(path: pathlib.Path, data: dict) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def get_active_profile() -> str | None:
+def get_active_profile() -> tuple[str | None, pathlib.Path | None]:
+    """Return (profile_name, profile_json_path) from the active file."""
     if ACTIVE_FILE.exists():
-        name = ACTIVE_FILE.read_text(encoding="utf-8").strip()
-        return name if name else None
-    return None
+        line = ACTIVE_FILE.read_text(encoding="utf-8").strip()
+        if not line:
+            return None, None
+        path = pathlib.Path(line)
+        name = path.stem if path.suffix == ".json" else line
+        return name, path if path.is_absolute() else None
+    return None, None
 
 
-def set_active_profile(name: str | None) -> None:
+def set_active_profile(name: str | None, profile_path: pathlib.Path | None = None) -> None:
     STATE_DIR.mkdir(parents=True, exist_ok=True)
-    if name:
-        ACTIVE_FILE.write_text(name + "\n", encoding="utf-8")
+    if name and profile_path:
+        ACTIVE_FILE.write_text(str(profile_path.resolve()) + "\n", encoding="utf-8")
     elif ACTIVE_FILE.exists():
         ACTIVE_FILE.unlink()
 
 
+def profile_path(name: str) -> pathlib.Path:
+    return profiles_dir() / f"{name}.json"
+
+
 def load_profile(name: str) -> dict:
-    path = profiles_dir() / f"{name}.json"
+    path = profile_path(name)
     if not path.exists():
         print(f"Profile not found: {name}", file=sys.stderr)
         print(f"Available: {', '.join(list_profiles())}", file=sys.stderr)
@@ -141,17 +150,20 @@ def add_profile_rules(settings: dict, profile: dict) -> dict:
 
 
 def cmd_list(args: argparse.Namespace) -> None:
-    active = get_active_profile()
+    active_name, active_path = get_active_profile()
     profiles = list_profiles()
-    result = {
-        "active_profile": active,
+    result: dict[str, object] = {
+        "active_profile": active_name,
+        "active_profile_path": str(active_path) if active_path else None,
         "profiles": [],
     }
+    entries = []
     for name in profiles:
-        entry = {"name": name, "preset": name in PRESETS}
-        if name == active:
+        entry: dict[str, object] = {"name": name, "preset": name in PRESETS}
+        if name == active_name:
             entry["active"] = True
-        result["profiles"].append(entry)
+        entries.append(entry)
+    result["profiles"] = entries
 
     # Show current sandbox config
     path = settings_path(False)
@@ -168,9 +180,11 @@ def cmd_show(args: argparse.Namespace) -> None:
     if args.name == "current":
         path = settings_path(False)
         settings = load_json(path)
+        active_name, active_path = get_active_profile()
         print_json({
             "settings_file": str(path),
-            "active_profile": get_active_profile(),
+            "active_profile": active_name,
+            "active_profile_path": str(active_path) if active_path else None,
             "sandbox": settings.get("sandbox"),
             "permissions": settings.get("permissions"),
         })
@@ -181,31 +195,39 @@ def cmd_show(args: argparse.Namespace) -> None:
 
 def cmd_apply(args: argparse.Namespace) -> None:
     new_profile = load_profile(args.name)
+    new_path = profile_path(args.name)
     shared = getattr(args, "shared", False)
     path = settings_path(shared)
     settings = load_json(path)
 
-    # Step 1: Remove old profile's rules
-    old_name = get_active_profile()
+    # Step 1: Remove old profile's rules (load from stored absolute path)
+    old_name, old_abs_path = get_active_profile()
     if old_name:
-        old_profile_path = profiles_dir() / f"{old_name}.json"
-        if old_profile_path.exists():
-            old_profile = load_json(old_profile_path)
-            settings = remove_profile_rules(settings, old_profile)
+        old_data = None
+        if old_abs_path and old_abs_path.exists():
+            old_data = load_json(old_abs_path)
         else:
-            # Old profile file gone, remove sandbox anyway
+            # Fallback: try current profiles dir
+            fallback = profile_path(old_name)
+            if fallback.exists():
+                old_data = load_json(fallback)
+        if old_data:
+            settings = remove_profile_rules(settings, old_data)
+        else:
+            # Cannot find old profile, remove sandbox anyway
             settings.pop("sandbox", None)
 
     # Step 2: Add new profile's rules
     settings = add_profile_rules(settings, new_profile)
 
-    # Step 3: Save
+    # Step 3: Save (store absolute path to profile JSON)
     save_json(path, settings)
-    set_active_profile(args.name)
+    set_active_profile(args.name, new_path)
 
     print_json({
         "action": "apply",
         "profile": args.name,
+        "profile_path": str(new_path.resolve()),
         "settings_file": str(path),
         "previous_profile": old_name,
         "sandbox_enabled": (settings.get("sandbox") or {}).get("enabled"),
@@ -218,12 +240,17 @@ def cmd_reset(args: argparse.Namespace) -> None:
     path = settings_path(shared)
     settings = load_json(path)
 
-    old_name = get_active_profile()
+    old_name, old_abs_path = get_active_profile()
     if old_name:
-        old_profile_path = profiles_dir() / f"{old_name}.json"
-        if old_profile_path.exists():
-            old_profile = load_json(old_profile_path)
-            settings = remove_profile_rules(settings, old_profile)
+        old_data = None
+        if old_abs_path and old_abs_path.exists():
+            old_data = load_json(old_abs_path)
+        else:
+            fallback = profile_path(old_name)
+            if fallback.exists():
+                old_data = load_json(fallback)
+        if old_data:
+            settings = remove_profile_rules(settings, old_data)
         else:
             settings.pop("sandbox", None)
 
