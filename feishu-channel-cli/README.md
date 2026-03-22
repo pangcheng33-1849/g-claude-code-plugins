@@ -1,43 +1,39 @@
 # @ben1849/feishu-channel
 
-CLI tools for [feishu-channel](../plugins/feishu-channel) — 管理 Claude Code 内置 sandbox 的安全配置。
+[feishu-channel](https://github.com/pangcheng1849/g-claude-code-plugins/tree/main/plugins/feishu-channel) 的配套 CLI 工具 — 管理 Claude Code 内置 sandbox 的安全配置。
 
-## 安装
-
-```bash
-# 从 npm（发布后）
-npx @ben1849/feishu-channel sandbox apply default
-
-# 本地使用
-npx ./@ben1849/feishu-channel sandbox apply default
-```
-
-## Sandbox Profile 管理
-
-在启动 feishu-channel 前配置 sandbox，控制文件系统访问和命令权限。
+## 快速开始
 
 ```bash
-# 应用安全模式（推荐飞书频道日常使用）
+# 交互模式（箭头键选择）
+npx @ben1849/feishu-channel sandbox
+
+# 直接应用安全模式
 npx @ben1849/feishu-channel sandbox apply default
-
-# 应用开发模式
-npx @ben1849/feishu-channel sandbox apply dev
-
-# 无限制模式（仅在信任环境使用）
-npx @ben1849/feishu-channel sandbox apply dangerously-open
-
-# 查看当前配置
-npx @ben1849/feishu-channel sandbox show
-
-# 移除 sandbox 配置
-npx @ben1849/feishu-channel sandbox reset
 ```
 
-配置写入 `.claude/settings.local.json`（个人、gitignored），Claude Code 自动重载。
+配置写入当前项目的 `.claude/settings.local.json`（个人、gitignored），Claude Code 自动重载。
+
+**注意**：必须在启动 Claude Code 的同一目录下执行。
+
+## 命令
+
+```bash
+npx @ben1849/feishu-channel sandbox              # 交互模式
+npx @ben1849/feishu-channel sandbox list          # 列出可用 profile
+npx @ben1849/feishu-channel sandbox show          # 查看当前配置
+npx @ben1849/feishu-channel sandbox show <name>   # 查看指定模板
+npx @ben1849/feishu-channel sandbox apply <name>  # 应用模板
+npx @ben1849/feishu-channel sandbox reset         # 移除 sandbox 配置
+npx @ben1849/feishu-channel sandbox create <name> [base]  # 创建自定义模板
+npx @ben1849/feishu-channel sandbox delete <name>         # 删除自定义模板
+```
 
 ## 预置模板
 
 ### `default` — 安全模式
+
+推荐飞书频道日常使用。
 
 | 项目 | 配置 |
 |------|------|
@@ -45,24 +41,26 @@ npx @ben1849/feishu-channel sandbox reset
 | 权限模式 | `dontAsk`（allow 列表外静默拒绝） |
 | 文件写入 | 仅 CWD + `~/.claude/channels/feishu` + `~/.feishu-auth-cache` + `/tmp` |
 | 文件读取 | 禁止 `~/.ssh`、`~/.aws`、`~/.gnupg` |
-| 网络 | 飞书域名自动放行，其他首次弹窗 |
-| 命令 | 只读命令 + skill 脚本 + git 只读 |
-| 保护 | 禁止修改 `.claude/settings*` |
+| 网络 | 常见 TLD 放行（`*.com`、`*.cn` 等） |
+| 命令 | 只读命令 + skill 脚本 + git 只读 + MCP 工具 |
+| 禁止 | `curl`/`wget`/`rm -rf`/`git push`/修改 settings |
 
 ### `dev` — 开发模式
+
+开发调试使用，权限更宽松。
 
 | 项目 | 配置 |
 |------|------|
 | Sandbox | 开启，允许逃逸口 |
 | 权限模式 | `dontAsk` |
 | 文件写入 | CWD + 包管理器缓存 + 开发工具目录 |
-| 网络 | 全部放开 |
-| 命令 | git/npm/pip/cargo/curl/docker/make 等全开 |
-| 保护 | 禁止修改 `.claude/settings*` |
+| 网络 | 常见 TLD 放行 |
+| 命令 | git/npm/pip/cargo/curl/docker/make 等全开 + MCP 工具 |
+| 禁止 | `rm -rf /`/修改 settings |
 
 ### `dangerously-open` — 无限制
 
-关闭 sandbox + `bypassPermissions`。等同 `--dangerously-skip-permissions`。
+关闭 sandbox + `bypassPermissions`。等同 `--dangerously-skip-permissions`。仅在信任环境使用。
 
 ## 自定义模板
 
@@ -70,12 +68,12 @@ npx @ben1849/feishu-channel sandbox reset
 # 基于 dev 创建
 npx @ben1849/feishu-channel sandbox create myprofile dev
 
-# 编辑（文件在 ~/.claude/channels/feishu/sandbox-profile/profiles/myprofile.json）
+# 编辑 ~/.claude/channels/feishu/sandbox-profile/profiles/myprofile.json
 
 # 应用
 npx @ben1849/feishu-channel sandbox apply myprofile
 
-# 删除
+# 删除（如有项目在用，需 --force）
 npx @ben1849/feishu-channel sandbox delete myprofile
 ```
 
@@ -83,9 +81,11 @@ npx @ben1849/feishu-channel sandbox delete myprofile
 
 ## 工作原理
 
-- 配置写入 `.claude/settings.local.json`，利用 Claude Code 内置 OS 级 sandbox（macOS Seatbelt / Linux bubblewrap）
+- 利用 Claude Code 内置 OS 级 sandbox（macOS Seatbelt / Linux bubblewrap）
+- 配置写入 `.claude/settings.local.json`，包含 `sandbox` + `permissions` 规则
 - 切换 profile 时**先删后加**：精确删除旧 profile 的规则，保留用户手动添加的规则
-- 当前激活的 profile 记录在 `~/.claude/channels/feishu/sandbox-profile/active`
+- 每个项目独立追踪当前 profile（`~/.claude/channels/feishu/sandbox-profile/active/`）
+- reset 时兜底清理：无 active 记录也能清除 sandbox 配置
 
 ## 许可
 
