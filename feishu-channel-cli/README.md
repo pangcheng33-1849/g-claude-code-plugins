@@ -5,29 +5,41 @@
 ## 快速开始
 
 ```bash
-# 交互模式（箭头键选择）
 npx @ben1849/feishu-channel sandbox
+```
 
-# 直接应用安全模式
-npx @ben1849/feishu-channel sandbox apply default
+交互式菜单，箭头键选择，回车确认：
+
+```
+┌  🔒 Sandbox Profile Manager
+│
+◇  Current status
+│  Profile:  (none)
+│  Settings: .claude/settings.local.json
+│
+◆  Select action
+│  ● Apply profile
+│  ○ Show current config
+│  ○ Show a profile template
+│  ○ Reset
+│  ○ Create custom profile
+│  ○ Delete custom profile
+└
+```
+
+也支持直接执行：
+
+```bash
+npx @ben1849/feishu-channel sandbox apply default   # 应用安全模式
+npx @ben1849/feishu-channel sandbox apply dev       # 应用开发模式
+npx @ben1849/feishu-channel sandbox reset           # 移除配置
+npx @ben1849/feishu-channel sandbox show            # 查看当前配置
+npx @ben1849/feishu-channel sandbox list            # 列出可用 profile
 ```
 
 配置写入当前项目的 `.claude/settings.local.json`（个人、gitignored），Claude Code 自动重载。
 
 **注意**：必须在启动 Claude Code 的同一目录下执行。
-
-## 命令
-
-```bash
-npx @ben1849/feishu-channel sandbox              # 交互模式
-npx @ben1849/feishu-channel sandbox list          # 列出可用 profile
-npx @ben1849/feishu-channel sandbox show          # 查看当前配置
-npx @ben1849/feishu-channel sandbox show <name>   # 查看指定模板
-npx @ben1849/feishu-channel sandbox apply <name>  # 应用模板
-npx @ben1849/feishu-channel sandbox reset         # 移除 sandbox 配置
-npx @ben1849/feishu-channel sandbox create <name> [base]  # 创建自定义模板
-npx @ben1849/feishu-channel sandbox delete <name>         # 删除自定义模板
-```
 
 ## 预置模板
 
