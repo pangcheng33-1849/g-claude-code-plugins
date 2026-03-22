@@ -102,7 +102,31 @@ Token 缓存由脚本内部管理，不要直接读写缓存文件。
 
 ### 用户授权（device auth）
 
-当需要用户授权 user access token 时（`auth-user --device-auth`），脚本会输出一个授权 URL。如果当前环境有飞书发送消息的能力（如 feishu-channel 的 reply 工具或 feishu-im-workflow），**优先通过飞书给用户发送包含授权链接的交互卡片**，而不是在终端打印 URL 让用户手动复制。
+当需要用户授权 user access token 时，`auth-user` 脚本会输出授权 URL 和用户验证码。
+
+**传达授权信息给用户**：
+
+- 如果当前环境有飞书发送消息的能力（feishu-channel 或 feishu-im-workflow），**优先通过飞书发送包含授权链接的交互卡片**
+- 如果在终端直接使用，打印 URL 让用户手动打开即可
+
+流程：
+
+1. 运行 `auth-user --scopes <需要的scope> offline_access`，获取授权 URL 和验证码
+2. 将授权 URL 和验证码传达给用户（飞书卡片或终端打印）
+3. 用户完成授权后，重新运行 `auth-user`（同样参数），脚本自动完成轮询并缓存 token
+
+**飞书授权卡片示例**（通过 feishu-im-workflow 的 `send-message --msg-type interactive` 发送）：
+```json
+{
+  "header": {"title": {"tag": "plain_text", "content": "需要授权"}, "template": "blue"},
+  "elements": [
+    {"tag": "div", "text": {"tag": "lark_md", "content": "需要授权 **<scope>** 权限。\n\n验证码：**<code>**"}},
+    {"tag": "action", "actions": [{"tag": "button", "text": {"tag": "plain_text", "content": "点击授权"}, "type": "primary", "url": "<auth_url>"}]}
+  ]
+}
+```
+
+**注意**：`auth-user` 脚本启动后会阻塞等待用户授权（轮询），首次执行可以先 kill 掉提取 URL，传达给用户后再重新执行。
 
 常用命令：
 
