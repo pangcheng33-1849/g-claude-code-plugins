@@ -57,6 +57,10 @@ def set_active_profile(name: str | None, profile_path: pathlib.Path | None = Non
 
 
 def profile_path(name: str) -> pathlib.Path:
+    """Find profile JSON: check custom dir first, then preset dir."""
+    custom = custom_profiles_dir() / f"{name}.json"
+    if custom.exists():
+        return custom
     return profiles_dir() / f"{name}.json"
 
 
@@ -70,9 +74,14 @@ def load_profile(name: str) -> dict:
 
 
 def list_profiles() -> list[str]:
-    return sorted(
-        p.stem for p in profiles_dir().glob("*.json")
-    )
+    names: set[str] = set()
+    for p in profiles_dir().glob("*.json"):
+        names.add(p.stem)
+    cdir = custom_profiles_dir()
+    if cdir.exists():
+        for p in cdir.glob("*.json"):
+            names.add(p.stem)
+    return sorted(names)
 
 
 def settings_path(shared: bool) -> pathlib.Path:
@@ -177,7 +186,9 @@ def cmd_list(args: argparse.Namespace) -> None:
 
 
 def cmd_show(args: argparse.Namespace) -> None:
-    if args.name == "current":
+    name = getattr(args, "name", None)
+    if not name or name == "current":
+        # Default: show current settings
         path = settings_path(False)
         settings = load_json(path)
         active_name, active_path = get_active_profile()
@@ -189,8 +200,8 @@ def cmd_show(args: argparse.Namespace) -> None:
             "permissions": settings.get("permissions"),
         })
     else:
-        profile = load_profile(args.name)
-        print_json({"profile": args.name, "config": profile})
+        profile = load_profile(name)
+        print_json({"profile": name, "path": str(profile_path(name).resolve()), "config": profile})
 
 
 def cmd_apply(args: argparse.Namespace) -> None:
@@ -265,6 +276,11 @@ def cmd_reset(args: argparse.Namespace) -> None:
     })
 
 
+def custom_profiles_dir() -> pathlib.Path:
+    """Custom profiles stored outside plugin dir to survive plugin updates."""
+    return STATE_DIR / "profiles"
+
+
 def cmd_create(args: argparse.Namespace) -> None:
     name = args.name
     if name in PRESETS:
@@ -273,7 +289,7 @@ def cmd_create(args: argparse.Namespace) -> None:
 
     base = args.base or "dev"
     base_profile = load_profile(base)
-    target = profiles_dir() / f"{name}.json"
+    target = custom_profiles_dir() / f"{name}.json"
     save_json(target, base_profile)
 
     print_json({
@@ -291,13 +307,14 @@ def cmd_delete(args: argparse.Namespace) -> None:
         print(f"Cannot delete preset profile: {name}", file=sys.stderr)
         sys.exit(1)
 
-    target = profiles_dir() / f"{name}.json"
+    target = custom_profiles_dir() / f"{name}.json"
     if not target.exists():
-        print(f"Profile not found: {name}", file=sys.stderr)
+        print(f"Custom profile not found: {name}", file=sys.stderr)
         sys.exit(1)
 
-    # If deleting the active profile, reset first
-    if get_active_profile() == name:
+    # If deleting the active profile, clear active marker
+    active_name, _ = get_active_profile()
+    if active_name == name:
         set_active_profile(None)
 
     target.unlink()
@@ -314,8 +331,8 @@ def main() -> None:
 
     subparsers.add_parser("list", help="List available profiles and current config.")
 
-    show = subparsers.add_parser("show", help="Show a profile or current config.")
-    show.add_argument("name", help="Profile name or 'current'.")
+    show = subparsers.add_parser("show", help="Show current config or a profile.")
+    show.add_argument("name", nargs="?", default=None, help="Profile name. Omit to show current config.")
 
     apply_cmd = subparsers.add_parser("apply", help="Apply a profile to settings.")
     apply_cmd.add_argument("name", help="Profile name to apply.")

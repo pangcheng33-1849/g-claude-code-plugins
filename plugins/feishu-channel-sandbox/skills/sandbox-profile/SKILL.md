@@ -22,7 +22,7 @@ cd <skill_base_dir> && python3 scripts/sandbox_profile.py <command> [args]
 | 命令 | 作用 |
 |------|------|
 | `list` | 列出可用模板，显示当前激活的 profile 和 sandbox 配置 |
-| `show <name>` | 显示模板内容（`name` 为 `current` 时显示当前配置） |
+| `show [name]` | 不带参数显示当前 sandbox 配置；带 name 显示指定模板内容 |
 | `apply <name>` | 应用模板（先删旧规则再加新规则），默认写 `.claude/settings.local.json` |
 | `apply <name> --shared` | 应用模板到 `.claude/settings.json`（团队共享） |
 | `reset` | 移除当前 profile 的 sandbox/permissions 规则 |
@@ -58,3 +58,5 @@ cd <skill_base_dir> && python3 scripts/sandbox_profile.py <command> [args]
 ```
 
 存储绝对路径确保插件版本更新后仍能找到旧 profile 文件进行精确规则删除。不存在时表示未应用任何 profile。
+
+自定义 profile 存储在 `~/.claude/channels/feishu/sandbox-profile/profiles/`，不随插件更新丢失。
