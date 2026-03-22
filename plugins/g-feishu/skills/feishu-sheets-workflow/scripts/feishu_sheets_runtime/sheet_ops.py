@@ -391,7 +391,7 @@ def cmd_clear_ranges(args: argparse.Namespace) -> None:
 # ---------------------------------------------------------------------------
 
 
-def _build_find_body(args: argparse.Namespace, *, is_replace: bool = False) -> dict[str, object]:
+def _build_find_body(args: argparse.Namespace) -> dict[str, object]:
     find_condition: dict[str, object] = {}
     if args.range:
         find_condition["range"] = args.range
