@@ -1,0 +1,82 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "allowUnsandboxedCommands": false,
+    "filesystem": {
+      "allowWrite": [
+        "~/.claude/channels/feishu",
+        "~/.claude/plugins",
+        "~/.feishu-auth-cache",
+        "/tmp"
+      ],
+      "denyRead": [
+        "~/.ssh",
+        "~/.aws",
+        "~/.gnupg"
+      ]
+    },
+    "network": {
+      "allowedDomains": [
+        "open.feishu.cn",
+        "*.feishu.cn",
+        "*.larkoffice.com",
+        "*.larksuite.com"
+      ]
+    }
+  },
+  "permissions": {
+    "defaultMode": "dontAsk",
+    "allow": [
+      "Bash(python3 */.claude/skills/*.py *)",
+      "Bash(python3 */.claude/plugins/*.py *)",
+      "Bash(node */.claude/skills/*.js *)",
+      "Bash(node */.claude/plugins/*.js *)",
+      "Bash(bash */.claude/skills/*.sh *)",
+      "Bash(bash */.claude/plugins/*.sh *)",
+      "Bash(bun */.claude/skills/*.[jt]s *)",
+      "Bash(bun */.claude/plugins/*.[jt]s *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(echo *)",
+      "Bash(printf *)",
+      "Bash(grep *)",
+      "Bash(rg *)",
+      "Bash(find *)",
+      "Bash(sort *)",
+      "Bash(uniq *)",
+      "Bash(diff *)",
+      "Bash(jq *)",
+      "Bash(sed *)",
+      "Bash(awk *)",
+      "Bash(cut *)",
+      "Bash(tr *)",
+      "Bash(date *)",
+      "Bash(pwd)",
+      "Bash(whoami)",
+      "Bash(which *)",
+      "Bash(file *)",
+      "Bash(stat *)",
+      "Bash(du *)",
+      "Bash(df *)",
+      "Bash(git status *)",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(git show *)",
+      "Bash(git branch *)",
+      "Bash(mkdir *)",
+      "Bash(readlink *)",
+      "Bash(ps *)"
+    ],
+    "deny": [
+      "Edit(.claude/settings*)",
+      "Write(.claude/settings*)",
+      "Bash(rm -rf *)",
+      "Bash(git push *)",
+      "Bash(git reset --hard *)"
+    ]
+  }
+}

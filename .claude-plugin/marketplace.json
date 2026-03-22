@@ -44,17 +44,6 @@
       "tags": ["feishu", "lark", "channel", "mcp"]
     },
     {
-      "name": "feishu-channel-sandbox",
-      "source": "./plugins/feishu-channel-sandbox",
-      "description": "Sandbox profile templates for feishu-channel — manages Claude Code native sandbox settings",
-      "version": "1.0.0",
-      "author": {
-        "name": "cheng-pang"
-      },
-      "category": "security",
-      "tags": ["feishu", "sandbox", "security", "hooks"]
-    },
-    {
       "name": "xhs-research",
       "source": "./plugins/xhs-research",
       "description": "Xiaohongshu reputation research workflow for Claude Code",

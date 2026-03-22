@@ -1,0 +1,20 @@
+{
+  "name": "g-claude-feishu-channel",
+  "version": "1.0.0",
+  "description": "CLI tools for feishu-channel — sandbox profile management and more",
+  "bin": {
+    "g-claude-feishu-channel": "./bin/cli.js"
+  },
+  "files": [
+    "bin/",
+    "profiles/"
+  ],
+  "keywords": ["claude-code", "feishu", "lark", "sandbox", "security"],
+  "author": "cheng-pang",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pangcheng1849/g-claude-code-plugins",
+    "directory": "g-claude-feishu-channel"
+  }
+}
