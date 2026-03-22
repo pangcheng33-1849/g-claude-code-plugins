@@ -18,6 +18,7 @@ from feishu_calendar_runtime.read_ops import (
     cmd_list_events,
 )
 from feishu_calendar_runtime.write_ops import (
+    cmd_add_event_attendees,
     cmd_create_event,
     cmd_delete_event,
     cmd_update_event,
@@ -104,6 +105,20 @@ def build_parser() -> argparse.ArgumentParser:
     add_calendar_arg(delete_event)
     delete_event.add_argument("--event-id", required=True)
     delete_event.set_defaults(func=cmd_delete_event)
+
+    add_event_attendees = subparsers.add_parser(
+        "add-event-attendees",
+        help="Add attendees (users, chats, or third-party emails) to an existing calendar event.",
+    )
+    add_token_args(add_event_attendees)
+    add_event_attendees.add_argument("--calendar-id", required=True, help="Calendar ID that owns the event.")
+    add_event_attendees.add_argument("--event-id", required=True, help="Event ID to add attendees to.")
+    add_event_attendees.add_argument("--attendee-open-id", action="append", default=[], help="User open_id to add as attendee. Repeatable.")
+    add_event_attendees.add_argument("--attendee-chat-id", action="append", default=[], help="Chat/group chat_id to add as attendee. Repeatable.")
+    add_event_attendees.add_argument("--attendee-email", action="append", default=[], help="Third-party email to add as attendee. Repeatable.")
+    add_event_attendees.add_argument("--need-notification", action="store_true", default=False, help="Send notification to attendees (default behavior).")
+    add_event_attendees.add_argument("--no-notification", action="store_true", default=False, help="Suppress attendee notification.")
+    add_event_attendees.set_defaults(func=cmd_add_event_attendees)
 
     freebusy = subparsers.add_parser(
         "freebusy",
