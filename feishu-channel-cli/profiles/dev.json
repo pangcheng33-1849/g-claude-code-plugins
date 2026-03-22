@@ -19,9 +19,6 @@
         "~/.gitignore_global",
         "~/.ssh"
       ]
-    },
-    "network": {
-      "allowedDomains": ["*"]
     }
   },
   "permissions": {
