@@ -18,10 +18,7 @@
     },
     "network": {
       "allowedDomains": [
-        "open.feishu.cn",
-        "*.feishu.cn",
-        "*.larkoffice.com",
-        "*.larksuite.com"
+        "*.com", "*.org", "*.io", "*.net", "*.dev", "*.cn", "*.cc"
       ]
     }
   },
