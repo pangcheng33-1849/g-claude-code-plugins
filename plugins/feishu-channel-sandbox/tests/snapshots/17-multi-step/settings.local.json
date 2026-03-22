@@ -3,6 +3,9 @@
     "allow": [
       "Bash(gh repo:*)",
       "WebFetch(domain:www.npmjs.com)",
+      "Bash(my-deploy-script *)",
+      "Bash(terraform *)",
+      "Bash(kubectl *)",
       "Bash(python3 */.claude/skills/*.py *)",
       "Bash(python3 */.claude/plugins/*.py *)",
       "Bash(node */.claude/skills/*.js *)",
@@ -46,8 +49,8 @@
       "Bash(readlink *)",
       "Bash(ps *)"
     ],
-    "defaultMode": "default",
     "deny": [
+      "Bash(rm -rf /home/*)",
       "Bash(rm -rf *)",
       "Bash(git push *)",
       "Bash(git reset --hard *)"
@@ -58,6 +61,7 @@
     "claude-md-management@claude-plugins-official": true
   },
   "effortLevel": "high",
+  "myCustomKey": "should-survive",
   "sandbox": {
     "enabled": true,
     "autoAllowBashIfSandboxed": true,

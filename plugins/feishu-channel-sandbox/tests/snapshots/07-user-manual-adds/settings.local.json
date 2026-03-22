@@ -44,13 +44,15 @@
       "Bash(git branch *)",
       "Bash(mkdir *)",
       "Bash(readlink *)",
-      "Bash(ps *)"
+      "Bash(ps *)",
+      "Bash(my-deploy-script *)"
     ],
     "defaultMode": "default",
     "deny": [
       "Bash(rm -rf *)",
       "Bash(git push *)",
-      "Bash(git reset --hard *)"
+      "Bash(git reset --hard *)",
+      "Bash(rm -rf /home/*)"
     ]
   },
   "enabledPlugins": {
@@ -82,5 +84,6 @@
         "*.larksuite.com"
       ]
     }
-  }
+  },
+  "myCustomKey": "should-survive"
 }

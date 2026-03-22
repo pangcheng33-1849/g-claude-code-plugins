@@ -1,35 +1,9 @@
 {
-  "sandbox": {
-    "enabled": true,
-    "autoAllowBashIfSandboxed": true,
-    "allowUnsandboxedCommands": true,
-    "excludedCommands": [
-      "docker",
-      "docker-compose"
-    ],
-    "filesystem": {
-      "allowWrite": [
-        "~/.claude/channels/feishu",
-        "~/.claude/plugins",
-        "/tmp",
-        "/usr/local",
-        "~/.npm",
-        "~/.bun",
-        "~/.cargo",
-        "~/.pnpm-store",
-        "~/.gitconfig",
-        "~/.gitignore_global",
-        "~/.ssh"
-      ]
-    },
-    "network": {
-      "allowedDomains": [
-        "*"
-      ]
-    }
-  },
   "permissions": {
     "allow": [
+      "Bash(gh repo:*)",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(my-deploy-script *)",
       "Bash(python3 *)",
       "Bash(python *)",
       "Bash(node *)",
@@ -72,8 +46,45 @@
       "Bash(vite *)",
       "Bash(webpack *)"
     ],
+    "defaultMode": "default",
     "deny": [
+      "Bash(rm -rf /home/*)",
       "Bash(rm -rf /)"
     ]
+  },
+  "enabledPlugins": {
+    "skill-creator@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true
+  },
+  "effortLevel": "high",
+  "myCustomKey": "should-survive",
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "allowUnsandboxedCommands": true,
+    "excludedCommands": [
+      "docker",
+      "docker-compose"
+    ],
+    "filesystem": {
+      "allowWrite": [
+        "~/.claude/channels/feishu",
+        "~/.claude/plugins",
+        "/tmp",
+        "/usr/local",
+        "~/.npm",
+        "~/.bun",
+        "~/.cargo",
+        "~/.pnpm-store",
+        "~/.gitconfig",
+        "~/.gitignore_global",
+        "~/.ssh"
+      ]
+    },
+    "network": {
+      "allowedDomains": [
+        "*"
+      ]
+    }
   }
 }
