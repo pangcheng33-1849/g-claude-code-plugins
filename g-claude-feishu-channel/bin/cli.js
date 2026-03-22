@@ -290,7 +290,7 @@ function cmdCreate(name, base) {
   }, null, 2));
 }
 
-function cmdDelete(name) {
+function cmdDelete(name, args = {}) {
   if (PRESETS.has(name)) {
     console.error(`Cannot delete preset profile: ${name}`);
     process.exit(1);
@@ -300,22 +300,46 @@ function cmdDelete(name) {
     console.error(`Custom profile not found: ${name}`);
     process.exit(1);
   }
-  const active = getActive();
-  if (active.name === name) {
-    // Remove profile rules from settings before deleting the file
-    const sp = settingsPath();
-    let settings = loadJson(sp);
-    const profileData = loadJson(target);
-    settings = removeProfileRules(settings, profileData);
-    saveJson(sp, settings);
-    setActive(null);
+  // Find all projects using this profile
+  const affectedProjects = [];
+  if (fs.existsSync(ACTIVE_DIR)) {
+    for (const f of fs.readdirSync(ACTIVE_DIR)) {
+      if (!f.endsWith(".json")) continue;
+      const data = loadJson(path.join(ACTIVE_DIR, f));
+      if (data.profile === name) {
+        affectedProjects.push({ file: f, project: data.project, profilePath: data.profile_path });
+      }
+    }
   }
+
+  if (affectedProjects.length > 0) {
+    console.error(`Profile '${name}' is currently active in ${affectedProjects.length} project(s):`);
+    for (const p of affectedProjects) {
+      console.error(`  - ${p.project}`);
+    }
+    console.error(`\nUse --force to reset these projects and delete the profile.`);
+    if (!args.force) process.exit(1);
+
+    // Force mode: reset each affected project's settings
+    const profileData = loadJson(target);
+    for (const p of affectedProjects) {
+      const projectSettings = path.join(p.project, ".claude", "settings.local.json");
+      if (fs.existsSync(projectSettings)) {
+        let settings = loadJson(projectSettings);
+        settings = removeProfileRules(settings, profileData);
+        saveJson(projectSettings, settings);
+      }
+      fs.unlinkSync(path.join(ACTIVE_DIR, p.file));
+    }
+  }
+
   fs.unlinkSync(target);
 
   console.log(JSON.stringify({
     action: "delete",
     profile: name,
-    message: `Profile '${name}' deleted.`,
+    affected_projects: affectedProjects.map(p => p.project),
+    message: `Profile '${name}' deleted.${affectedProjects.length ? ` Reset ${affectedProjects.length} project(s).` : ""}`,
   }, null, 2));
 }
 
@@ -415,7 +439,7 @@ async function interactiveSandbox() {
       options: customs.map(n => ({ value: n, label: n })),
     });
     if (isCancel(name)) { cancel("Cancelled."); process.exit(0); }
-    cmdDelete(name);
+    cmdDelete(name, { force: true });
     outro(`Profile '${name}' deleted.`);
   }
 }
@@ -452,7 +476,7 @@ Presets:
   else if (sub === "apply") { if (!args[2]) { console.error("Usage: sandbox apply <name>"); process.exit(1); } cmdApply(args[2]); }
   else if (sub === "reset") cmdReset();
   else if (sub === "create") { if (!args[2]) { console.error("Usage: sandbox create <name> [base]"); process.exit(1); } cmdCreate(args[2], args[3]); }
-  else if (sub === "delete") { if (!args[2]) { console.error("Usage: sandbox delete <name>"); process.exit(1); } cmdDelete(args[2]); }
+  else if (sub === "delete") { if (!args[2]) { console.error("Usage: sandbox delete <name> [--force]"); process.exit(1); } cmdDelete(args[2], { force: args.includes("--force") }); }
   else { console.error(`Unknown sandbox command: ${sub}\nAvailable: list, show, apply, reset, create, delete`); process.exit(1); }
 } else if (!cmd || cmd === "--help" || cmd === "-h") {
   console.log(`g-claude-feishu-channel — CLI tools for feishu-channel
