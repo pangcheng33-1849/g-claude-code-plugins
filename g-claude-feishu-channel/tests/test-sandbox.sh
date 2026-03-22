@@ -80,7 +80,7 @@ echo "=== 1. list (no active) ==="
 OUT=$(node "$CLI" sandbox list)
 assert_eq "active null" "null" "$(echo "$OUT" | jv 'd.active_profile')"
 assert_eq "has presets" "true" "$(echo "$OUT" | jv '["default","dev","dangerously-open"].every(n=>d.profiles.some(p=>p.name===n))')"
-assert_eq "user allow visible" "true" "$(echo "$OUT" | jv '(d.current_permissions_allow||[]).includes("Bash(gh repo:*)")')"
+assert_eq "user allow visible" "true" "$(echo "$OUT" | jv '((d.permissions||{}).allow||[]).includes("Bash(gh repo:*)")')"
 
 echo "=== 2. show (current) ==="
 OUT=$(node "$CLI" sandbox show)

@@ -152,10 +152,9 @@ function cmdList() {
     active_profile: active.name,
     active_profile_path: active.path,
     profiles,
-    current_sandbox: settings.sandbox || null,
-    current_permissions_allow: (settings.permissions || {}).allow || null,
-    current_permissions_deny: (settings.permissions || {}).deny || null,
     settings_file: sp,
+    sandbox: settings.sandbox || null,
+    permissions: settings.permissions || null,
   }, null, 2));
 }
 
