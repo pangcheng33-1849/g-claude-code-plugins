@@ -1,14 +1,32 @@
 #!/usr/bin/env bash
 # Automated tests for sandbox_profile.py
-# Run from project root: bash plugins/feishu-channel-sandbox/tests/test-sandbox-profile.sh
+# Run from repo root: bash plugins/feishu-channel-sandbox/tests/test-sandbox-profile.sh
+# Uses temp directories — does NOT modify user settings or HOME.
 
 set -euo pipefail
 
-SCRIPT="plugins/feishu-channel-sandbox/skills/sandbox-profile/scripts/sandbox_profile.py"
+# Resolve script path relative to repo root before changing dirs
+REPO_ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
+SCRIPT="$REPO_ROOT/plugins/feishu-channel-sandbox/skills/sandbox-profile/scripts/sandbox_profile.py"
+
+# Create isolated test environment
+TEST_DIR=$(mktemp -d)
+TEST_HOME=$(mktemp -d)
+mkdir -p "$TEST_DIR/.claude"
+
+# Override HOME so active file goes to temp dir
+export HOME="$TEST_HOME"
+cd "$TEST_DIR"
+
 SETTINGS=".claude/settings.local.json"
-ACTIVE="$HOME/.claude/channels/feishu/sandbox-profile/active"
+ACTIVE="$TEST_HOME/.claude/channels/feishu/sandbox-profile/active"
 PASS=0
 FAIL=0
+
+cleanup() {
+  rm -rf "$TEST_DIR" "$TEST_HOME"
+}
+trap cleanup EXIT
 
 assert_eq() {
   local desc="$1" expected="$2" actual="$3"
@@ -59,10 +77,7 @@ $1
 }
 
 # ── Setup ──
-echo "=== Setup: reset ==="
-python3 "$SCRIPT" reset > /dev/null 2>&1 || true
-# Remove any leftover settings.local.json from previous test runs
-rm -f "$SETTINGS"
+echo "=== Setup ==="
 
 # ── 1. list: no active profile ──
 echo "=== 1. list (no active) ==="
