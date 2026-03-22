@@ -146,15 +146,9 @@ function cmdList() {
     preset: PRESETS.has(name),
     ...(name === active.name ? { active: true } : {}),
   }));
-  const sp = settingsPath();
-  const settings = loadJson(sp);
   console.log(JSON.stringify({
     active_profile: active.name,
-    active_profile_path: active.path,
     profiles,
-    settings_file: sp,
-    sandbox: settings.sandbox || null,
-    permissions: settings.permissions || null,
   }, null, 2));
 }
 
