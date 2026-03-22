@@ -108,7 +108,10 @@ def remove_profile_rules(settings: dict, profile: dict) -> dict:
             perms["deny"] = [r for r in perms["deny"] if r not in profile_deny]
             if not perms["deny"]:
                 del perms["deny"]
-        # Clean up empty permissions object (keep if has other keys like defaultMode)
+        # Remove defaultMode if it was set by the profile
+        if "defaultMode" in profile_perms and perms.get("defaultMode") == profile_perms["defaultMode"]:
+            del perms["defaultMode"]
+        # Clean up empty permissions object
         if not perms:
             del settings["permissions"]
 
@@ -173,7 +176,7 @@ def cmd_list(args: argparse.Namespace) -> None:
     result["profiles"] = entries
 
     # Show current sandbox config
-    path = settings_path(False)
+    path = settings_path()
     settings = load_json(path)
     result["current_sandbox"] = settings.get("sandbox")
     result["current_permissions_allow"] = (settings.get("permissions") or {}).get("allow")
@@ -187,7 +190,7 @@ def cmd_show(args: argparse.Namespace) -> None:
     name = getattr(args, "name", None)
     if not name or name == "current":
         # Default: show current settings
-        path = settings_path(False)
+        path = settings_path()
         settings = load_json(path)
         active_name, active_path = get_active_profile()
         print_json({
