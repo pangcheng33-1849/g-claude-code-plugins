@@ -346,95 +346,103 @@ const PROFILE_DESCRIPTIONS = {
 };
 
 async function interactiveSandbox() {
-  const { intro, outro, select, text, isCancel, cancel, note } = require("@clack/prompts");
-  const active = getActive();
+  const { intro, outro, select, text, isCancel, cancel, note, log } = require("@clack/prompts");
 
   intro("🔒 Sandbox Profile Manager");
 
-  note(
-    `Profile:  ${active.name || "(none)"}\nSettings: ${settingsPath()}`,
-    "Current status"
-  );
+  while (true) {
+    const active = getActive();
+    note(
+      `Profile:  ${active.name || "(none)"}\nSettings: ${settingsPath()}`,
+      "Current status"
+    );
 
-  const action = await select({
-    message: "Select action",
-    options: [
-      { value: "apply", label: "Apply profile", hint: "switch sandbox mode" },
-      { value: "show", label: "Show current config" },
-      { value: "show-profile", label: "Show a profile template" },
-      { value: "reset", label: "Reset", hint: "remove sandbox config" },
-      { value: "create", label: "Create custom profile" },
-      { value: "delete", label: "Delete custom profile" },
-    ],
-  });
-  if (isCancel(action)) { cancel("Cancelled."); process.exit(0); }
-
-  if (action === "apply") {
-    const profiles = listProfiles();
-    const name = await select({
-      message: "Select profile to apply",
-      options: profiles.map(n => ({
-        value: n,
-        label: n,
-        hint: `${n === active.name ? "(active) " : ""}${PROFILE_DESCRIPTIONS[n] || "custom"}`,
-      })),
+    const action = await select({
+      message: "Select action",
+      options: [
+        { value: "apply", label: "Apply profile", hint: "switch sandbox mode" },
+        { value: "show", label: "Show current config" },
+        { value: "show-profile", label: "Show a profile template" },
+        { value: "reset", label: "Reset", hint: "remove sandbox config" },
+        { value: "create", label: "Create custom profile" },
+        { value: "delete", label: "Delete custom profile" },
+      ],
     });
-    if (isCancel(name)) { cancel("Cancelled."); process.exit(0); }
-    cmdApply(name);
-    outro(`Profile '${name}' applied.`);
+    if (isCancel(action)) { cancel("Cancelled."); process.exit(0); }
 
-  } else if (action === "show") {
-    cmdShow();
-    outro("Done.");
+    if (action === "apply") {
+      const profiles = listProfiles();
+      const name = await select({
+        message: "Select profile to apply",
+        options: profiles.map(n => ({
+          value: n,
+          label: n,
+          hint: `${n === active.name ? "(active) " : ""}${PROFILE_DESCRIPTIONS[n] || "custom"}`,
+        })),
+      });
+      if (isCancel(name)) continue;
+      cmdApply(name);
+      outro(`Profile '${name}' applied.`);
+      return;
 
-  } else if (action === "show-profile") {
-    const profiles = listProfiles();
-    const name = await select({
-      message: "Select profile to view",
-      options: profiles.map(n => ({
-        value: n,
-        label: n,
-        hint: PROFILE_DESCRIPTIONS[n] || "custom",
-      })),
-    });
-    if (isCancel(name)) { cancel("Cancelled."); process.exit(0); }
-    cmdShow(name);
-    outro("Done.");
+    } else if (action === "show") {
+      cmdShow();
+      log.info("Press Esc to go back...");
+      continue;
 
-  } else if (action === "reset") {
-    cmdReset();
-    outro("Sandbox configuration removed.");
+    } else if (action === "show-profile") {
+      const profiles = listProfiles();
+      const name = await select({
+        message: "Select profile to view",
+        options: profiles.map(n => ({
+          value: n,
+          label: n,
+          hint: PROFILE_DESCRIPTIONS[n] || "custom",
+        })),
+      });
+      if (isCancel(name)) continue;
+      cmdShow(name);
+      log.info("Press Esc to go back...");
+      continue;
 
-  } else if (action === "create") {
-    const name = await text({ message: "New profile name" });
-    if (isCancel(name) || !name) { cancel("Cancelled."); process.exit(0); }
-    const profiles = listProfiles();
-    const base = await select({
-      message: "Base profile",
-      options: profiles.map(n => ({
-        value: n,
-        label: n,
-        hint: PROFILE_DESCRIPTIONS[n] || "custom",
-      })),
-      initialValue: "dev",
-    });
-    if (isCancel(base)) { cancel("Cancelled."); process.exit(0); }
-    cmdCreate(name, base);
-    outro(`Profile '${name}' created from '${base}'.`);
+    } else if (action === "reset") {
+      cmdReset();
+      outro("Sandbox configuration removed.");
+      return;
 
-  } else if (action === "delete") {
-    const customs = listProfiles().filter(n => !PRESETS.has(n));
-    if (customs.length === 0) {
-      outro("No custom profiles to delete.");
+    } else if (action === "create") {
+      const name = await text({ message: "New profile name" });
+      if (isCancel(name) || !name) continue;
+      const profiles = listProfiles();
+      const base = await select({
+        message: "Base profile",
+        options: profiles.map(n => ({
+          value: n,
+          label: n,
+          hint: PROFILE_DESCRIPTIONS[n] || "custom",
+        })),
+        initialValue: "dev",
+      });
+      if (isCancel(base)) continue;
+      cmdCreate(name, base);
+      outro(`Profile '${name}' created from '${base}'.`);
+      return;
+
+    } else if (action === "delete") {
+      const customs = listProfiles().filter(n => !PRESETS.has(n));
+      if (customs.length === 0) {
+        log.warn("No custom profiles to delete.");
+        continue;
+      }
+      const name = await select({
+        message: "Select custom profile to delete",
+        options: customs.map(n => ({ value: n, label: n })),
+      });
+      if (isCancel(name)) continue;
+      cmdDelete(name, { force: true });
+      outro(`Profile '${name}' deleted.`);
       return;
     }
-    const name = await select({
-      message: "Select custom profile to delete",
-      options: customs.map(n => ({ value: n, label: n })),
-    });
-    if (isCancel(name)) { cancel("Cancelled."); process.exit(0); }
-    cmdDelete(name, { force: true });
-    outro(`Profile '${name}' deleted.`);
   }
 }
 
