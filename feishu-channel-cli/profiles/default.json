@@ -80,6 +80,8 @@
     "deny": [
       "Edit(.claude/settings*)",
       "Write(.claude/settings*)",
+      "Bash(curl *)",
+      "Bash(wget *)",
       "Bash(rm -rf *)",
       "Bash(git push *)",
       "Bash(git reset --hard *)"
