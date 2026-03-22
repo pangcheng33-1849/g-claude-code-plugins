@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh repo:*)",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(my-deploy-script *)"
+    ],
+    "deny": [
+      "Bash(rm -rf /home/*)"
+    ],
+    "defaultMode": "bypassPermissions"
+  },
+  "enabledPlugins": {
+    "skill-creator@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true
+  },
+  "effortLevel": "high",
+  "myCustomKey": "should-survive",
+  "sandbox": {
+    "enabled": false
+  }
+}

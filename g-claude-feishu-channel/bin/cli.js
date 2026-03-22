@@ -423,6 +423,23 @@ if (cmd === "sandbox") {
     // No subcommand → interactive mode
     interactiveSandbox().catch(e => { console.error(e); process.exit(1); });
   }
+  else if (sub === "--help" || sub === "-h") {
+    console.log(`Sandbox profile manager
+
+Usage:
+  sandbox                        Interactive mode (arrow keys)
+  sandbox list                   List profiles and current config
+  sandbox show [name]            Show current config or a profile
+  sandbox apply <name>           Apply a sandbox profile
+  sandbox reset                  Remove sandbox configuration
+  sandbox create <name> [base]   Create custom profile (default base: dev)
+  sandbox delete <name>          Delete custom profile
+
+Presets:
+  default           安全模式 — 只读命令 + skill 脚本，飞书域名白名单
+  dev               开发模式 — 完整开发工具，全域名放开
+  dangerously-open  无限制 — 关闭 sandbox + bypassPermissions`);
+  }
   else if (sub === "list") cmdList();
   else if (sub === "show") cmdShow(args[2]);
   else if (sub === "apply") { if (!args[2]) { console.error("Usage: sandbox apply <name>"); process.exit(1); } cmdApply(args[2]); }
