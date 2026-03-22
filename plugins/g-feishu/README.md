@@ -27,13 +27,15 @@ claude --plugin-dir ./plugins/g-feishu
 - `feishu-bitable-workflow`
   用于创建和管理多维表格 app、数据表、字段、记录和视图。
 - `feishu-calendar-workflow`
-  用于创建、查询、更新、删除日程，以及查询忙闲时间。
+  用于创建、查询、更新、删除日程，管理参会人，以及查询忙闲时间。
 - `feishu-doc-workflow`
   用于读取、创建、更新、导入飞书文档和 wiki，并处理文档里的图片、白板和附件。
 - `feishu-im-workflow`
   用于创建群聊、发送消息、回复消息、编辑/撤回消息、管理 reaction、读取话题和线程。
 - `feishu-search-and-locate`
-  用于搜索用户、文档、wiki 和群聊，并定位后续工作流需要的稳定标识符。
+  用于搜索用户、文档、wiki、群聊和消息，并定位后续工作流需要的稳定标识符。
+- `feishu-sheets-workflow`
+  用于创建和管理电子表格，读写单元格数据，查找替换内容，支持 Drive 文件夹和 wiki 节点下创建。
 - `feishu-task-workflow`
   用于创建、更新、查询、完成、恢复、删除任务，以及管理任务成员和提醒。
 

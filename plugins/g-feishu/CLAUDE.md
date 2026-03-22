@@ -1,6 +1,6 @@
 # g-feishu
 
-Feishu (Lark) integration — 8 self-contained skills under `skills/<skill-name>/`.
+Feishu (Lark) integration — 9 self-contained skills under `skills/<skill-name>/`.
 
 ## Skills
 
@@ -10,9 +10,10 @@ Feishu (Lark) integration — 8 self-contained skills under `skills/<skill-name>
 | `feishu-im-workflow` | Send/reply/edit messages, upload images/files, manage chats & reactions |
 | `feishu-doc-workflow` | Read/create/update/export docs and wikis |
 | `feishu-bitable-workflow` | Manage Bitable apps, tables, fields, records |
-| `feishu-calendar-workflow` | Create/query/update events, check free/busy |
+| `feishu-sheets-workflow` | Create/read/write spreadsheets, find/replace cells |
+| `feishu-calendar-workflow` | Create/query/update events, manage attendees, check free/busy |
 | `feishu-task-workflow` | Create/update/complete tasks |
-| `feishu-search-and-locate` | Search users, docs, chats; resolve stable IDs |
+| `feishu-search-and-locate` | Search users, docs, chats, messages; resolve stable IDs |
 | `feishu-api-diagnose` | Diagnose API errors, invalid IDs, permission failures |
 
 ## Skill Internals

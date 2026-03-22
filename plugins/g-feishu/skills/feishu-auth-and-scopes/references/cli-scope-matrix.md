@@ -82,6 +82,7 @@
 | `create-event` | tenant 优先 | `calendar:calendar.event:create` + attendee 相关权限族（tenant 路径） | tenant 创建时建议同时加用户参会人。 |
 | `update-event` / `delete-event` | user 优先 | calendar event 写权限族；按官方文档确认 | 若用 tenant，需确认目标日历可写。 |
 | `freebusy` | user 优先 | freebusy / availability 读取权限族；按官方文档确认 | 忙闲查询通常对用户身份更自然。 |
+| `add-event-attendees` | tenant/user | `calendar:calendar` 或 `calendar:calendar.event:update` | 已真实验证。支持 user/chat/third_party 类型参与人。 |
 
 ## feishu-search-and-locate
 
@@ -91,6 +92,7 @@
 | `search-doc` | user 优先 | 文档搜索权限族；按 `search/v2/doc_wiki/search` 文档确认 | 当前只保留 `DOC` 结果。 |
 | `search-wiki` | user 优先 | wiki 搜索权限族；按 `wiki/v1/nodes/search` 文档确认 | |
 | `search-chat` | user 优先 | chat 搜索 / IM 读取权限族；按 `im/v1/chats/search` 文档确认 | |
+| `search-message` | user 优先 | `search:message` | 已真实验证。仅支持 user token。 |
 
 ## feishu-im-workflow
 
@@ -117,6 +119,18 @@
 | `create-field` / `list-fields` / `update-field` / `delete-field` | user 优先 | field 读写权限族 | |
 | `create-record` / `list-records` / `update-record` / `delete-record` / `batch-create-records` / `batch-update-records` / `batch-delete-records` | user 优先 | record 读写权限族 | |
 | `get-view` / `create-view` / `list-views` / `update-view` / `delete-view` | user 优先 | view 读写权限族 | |
+
+## feishu-sheets-workflow
+
+| 命令 | 默认身份 | 最小权限 / 前置 | 说明 |
+| --- | --- | --- | --- |
+| `create-sheet` | user 优先 | `sheets:spreadsheet:create` | 已真实验证。Drive 文件夹需 user token；wiki 节点需先添加文档应用。 |
+| `get-sheet-info` / `query-sheets` | user 优先 | `sheets:spreadsheet.meta:read` | 已真实验证。 |
+| `create-worksheet` / `copy-worksheet` / `delete-worksheet` | user 优先 | `sheets:spreadsheet:write_only` | 已真实验证。 |
+| `read-ranges` | user 优先 | `sheets:spreadsheet:read` | 已真实验证。 |
+| `write-cells` / `insert-rows` / `append-rows` / `clear-ranges` | user 优先 | `sheets:spreadsheet:write_only` | 已真实验证。 |
+| `find-cells` | user 优先 | `sheets:spreadsheet:read` | 已真实验证。 |
+| `replace-cells` | user 优先 | `sheets:spreadsheet:write_only` | 已真实验证。 |
 
 ## feishu-api-diagnose
 
