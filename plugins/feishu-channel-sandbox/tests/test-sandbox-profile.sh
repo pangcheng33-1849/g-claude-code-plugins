@@ -23,6 +23,19 @@ ACTIVE="$TEST_HOME/.claude/channels/feishu/sandbox-profile/active"
 PASS=0
 FAIL=0
 
+# Snapshots directory for intermediate results
+SNAPSHOTS="$REPO_ROOT/plugins/feishu-channel-sandbox/tests/snapshots"
+rm -rf "$SNAPSHOTS"
+mkdir -p "$SNAPSHOTS"
+
+snapshot() {
+  local step="$1"
+  local dir="$SNAPSHOTS/$step"
+  mkdir -p "$dir"
+  cp "$SETTINGS" "$dir/settings.local.json" 2>/dev/null || echo '{}' > "$dir/settings.local.json"
+  cp "$ACTIVE" "$dir/active" 2>/dev/null || echo '(not set)' > "$dir/active"
+}
+
 cleanup() {
   rm -rf "$TEST_DIR" "$TEST_HOME"
 }
@@ -78,6 +91,7 @@ $1
 
 # ── Setup ──
 echo "=== Setup ==="
+snapshot "00-setup"
 
 # ── 1. list: no active profile ──
 echo "=== 1. list (no active) ==="
@@ -119,6 +133,7 @@ assert sb.get('enabled') == True, 'sandbox should be enabled'
 print('all assertions passed')
 "
 LAST=$?; [[ $LAST -eq 0 ]] && { echo "  PASS: default rules correct"; ((PASS++)); } || { echo "  FAIL: default rules"; ((FAIL++)); }
+snapshot "05-apply-default"
 
 # ── 6. list shows default active ──
 echo "=== 6. list shows active ==="
@@ -139,6 +154,7 @@ assert sb.get('allowUnsandboxedCommands') == True, 'escape should be True'
 print('all assertions passed')
 "
 LAST=$?; [[ $LAST -eq 0 ]] && { echo "  PASS: dev rules correct, default rules removed"; ((PASS++)); } || { echo "  FAIL: dev switch"; ((FAIL++)); }
+snapshot "07-switch-to-dev"
 
 # ── 8. switch dev → dangerously-open ──
 echo "=== 8. switch dev → dangerously-open ==="
@@ -154,6 +170,7 @@ assert 'Bash(git *)' not in a, 'dev git rule should be removed'
 print('all assertions passed')
 "
 LAST=$?; [[ $LAST -eq 0 ]] && { echo "  PASS: dangerously-open correct, dev rules removed"; ((PASS++)); } || { echo "  FAIL: dangerously-open"; ((FAIL++)); }
+snapshot "08-switch-to-dangerously-open"
 
 # ── 9. reset from dangerously-open ──
 echo "=== 9. reset ==="
@@ -165,6 +182,7 @@ print('all assertions passed')
 "
 LAST=$?; [[ $LAST -eq 0 ]] && { echo "  PASS: reset clean"; ((PASS++)); } || { echo "  FAIL: reset"; ((FAIL++)); }
 assert_eq "active file removed" "false" "$([ -f "$ACTIVE" ] && echo true || echo false)"
+snapshot "09-reset"
 
 # ── 10. create custom profile ──
 echo "=== 10. create custom profile ==="
@@ -181,6 +199,7 @@ assert_eq "mytest in list" "True" "$(python3 "$SCRIPT" list | jq_val '"mytest" i
 echo "=== 12. apply custom ==="
 python3 "$SCRIPT" apply mytest > /dev/null
 assert_eq "active is mytest" "mytest" "$(python3 "$SCRIPT" list | jq_val 'd["active_profile"]')"
+snapshot "12-apply-custom"
 
 # ── 13. delete preset fails ──
 echo "=== 13. delete preset fails ==="
@@ -220,6 +239,7 @@ assert 'Bash(cat *)' not in a, 'default rule should be removed'
 print('all assertions passed')
 "
 LAST=$?; [[ $LAST -eq 0 ]] && { echo "  PASS: user rules preserved"; ((PASS++)); } || { echo "  FAIL: user rules"; ((FAIL++)); }
+snapshot "16-user-rules-preserved"
 
 # ── Cleanup ──
 python3 "$SCRIPT" reset > /dev/null 2>&1 || true
