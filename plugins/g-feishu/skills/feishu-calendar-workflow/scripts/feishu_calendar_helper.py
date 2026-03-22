@@ -116,9 +116,7 @@ def build_parser() -> argparse.ArgumentParser:
     add_event_attendees.add_argument("--attendee-open-id", action="append", default=[], help="User open_id to add as attendee. Repeatable.")
     add_event_attendees.add_argument("--attendee-chat-id", action="append", default=[], help="Chat/group chat_id to add as attendee. Repeatable.")
     add_event_attendees.add_argument("--attendee-email", action="append", default=[], help="Third-party email to add as attendee. Repeatable.")
-    notif_group = add_event_attendees.add_mutually_exclusive_group()
-    notif_group.add_argument("--need-notification", action="store_true", default=False, help="Send notification to attendees (default behavior).")
-    notif_group.add_argument("--no-notification", action="store_true", default=False, help="Suppress attendee notification.")
+    add_event_attendees.add_argument("--no-notification", action="store_true", default=False, help="Suppress attendee notification. Default is to notify.")
     add_event_attendees.set_defaults(func=cmd_add_event_attendees)
 
     freebusy = subparsers.add_parser(

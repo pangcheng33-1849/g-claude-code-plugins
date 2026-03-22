@@ -356,11 +356,7 @@ def cmd_add_event_attendees(args: argparse.Namespace) -> None:
             api_alias="calendar_v4_calendarEventAttendee_create",
             auth_mode=auth_mode,
         )
-    need_notification = True
-    if getattr(args, "no_notification", False):
-        need_notification = False
-    elif getattr(args, "need_notification", False):
-        need_notification = True
+    need_notification = not getattr(args, "no_notification", False)
     response = calendar_request(
         method="POST",
         path=f"/calendar/v4/calendars/{urllib.parse.quote(args.calendar_id, safe='')}/events/{urllib.parse.quote(args.event_id, safe='')}/attendees",
