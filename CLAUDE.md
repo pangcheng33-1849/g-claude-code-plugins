@@ -39,7 +39,9 @@ Version is stored in two places — both must be updated together:
 - `plugins/<name>/.claude-plugin/plugin.json` → `"version"`
 - `.claude-plugin/marketplace.json` → the matching plugin entry's `"version"`
 
-**Rule: every PR that modifies a plugin must bump its version.** Before creating a PR, check which plugins have changes and bump their minor or patch version in both places. If you forget, the PR description will be missing version info — treat that as a red flag.
+**Rule: every PR that modifies a plugin must bump its version.** Before creating a PR, check which plugins have changes and bump their version in both places. If you forget, the PR description will be missing version info — treat that as a red flag.
+
+Follow SemVer: **major** = breaking changes, **minor** = new features, **patch** = bug fixes, docs, refactors.
 
 ## Adding a New Plugin
 
