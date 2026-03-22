@@ -63,7 +63,11 @@ export MY_LARK_BRAND="lark"
 ### 4. 启动
 
 ```bash
+# 基础启动（每次操作需在终端手动授权）
 claude --dangerously-load-development-channels plugin:feishu-channel@g-claude-code-plugins
+
+# 推荐：跳过权限确认，适合信任环境
+claude --dangerously-skip-permissions --dangerously-load-development-channels plugin:feishu-channel@g-claude-code-plugins
 ```
 
 建议设置 alias：
