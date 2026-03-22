@@ -25,6 +25,7 @@
     }
   },
   "permissions": {
+    "defaultMode": "dontAsk",
     "allow": [
       "Bash(python3 */.claude/skills/*.py *)",
       "Bash(python3 */.claude/plugins/*.py *)",

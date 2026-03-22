@@ -46,11 +46,11 @@
       "Bash(vite *)",
       "Bash(webpack *)"
     ],
-    "defaultMode": "default",
     "deny": [
       "Bash(rm -rf /home/*)",
       "Bash(rm -rf /)"
-    ]
+    ],
+    "defaultMode": "dontAsk"
   },
   "enabledPlugins": {
     "skill-creator@claude-plugins-official": true,

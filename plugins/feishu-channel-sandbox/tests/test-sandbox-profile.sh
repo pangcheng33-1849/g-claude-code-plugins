@@ -123,7 +123,7 @@ assert 'WebFetch(domain:www.npmjs.com)' in a, 'user webfetch lost'
 # User non-permission config preserved
 assert s.get('enabledPlugins',{}).get('skill-creator@claude-plugins-official') == True, 'enabledPlugins lost'
 assert s.get('effortLevel') == 'high', 'effortLevel lost'
-assert s.get('permissions',{}).get('defaultMode') == 'default', 'defaultMode changed'
+assert s.get('permissions',{}).get('defaultMode') == 'dontAsk', 'defaultMode should be dontAsk'
 # Sandbox applied
 assert s['sandbox']['enabled'] == True, 'sandbox not enabled'
 assert s['sandbox']['allowUnsandboxedCommands'] == False, 'escape not false'

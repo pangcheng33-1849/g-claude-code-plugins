@@ -54,7 +54,8 @@
       "Bash(rm -rf *)",
       "Bash(git push *)",
       "Bash(git reset --hard *)"
-    ]
+    ],
+    "defaultMode": "dontAsk"
   },
   "enabledPlugins": {
     "skill-creator@claude-plugins-official": true,

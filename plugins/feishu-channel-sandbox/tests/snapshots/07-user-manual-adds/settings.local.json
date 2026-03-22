@@ -47,7 +47,7 @@
       "Bash(ps *)",
       "Bash(my-deploy-script *)"
     ],
-    "defaultMode": "default",
+    "defaultMode": "dontAsk",
     "deny": [
       "Bash(rm -rf *)",
       "Bash(git push *)",

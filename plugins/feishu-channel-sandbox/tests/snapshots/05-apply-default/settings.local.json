@@ -46,7 +46,7 @@
       "Bash(readlink *)",
       "Bash(ps *)"
     ],
-    "defaultMode": "default",
+    "defaultMode": "dontAsk",
     "deny": [
       "Bash(rm -rf *)",
       "Bash(git push *)",

@@ -5,10 +5,10 @@
       "WebFetch(domain:www.npmjs.com)",
       "Bash(my-deploy-script *)"
     ],
-    "defaultMode": "bypassPermissions",
     "deny": [
       "Bash(rm -rf /home/*)"
-    ]
+    ],
+    "defaultMode": "bypassPermissions"
   },
   "enabledPlugins": {
     "skill-creator@claude-plugins-official": true,
