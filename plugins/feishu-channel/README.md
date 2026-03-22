@@ -36,19 +36,20 @@ export MY_LARK_APP_ID="cli_xxxxxxxx"
 export MY_LARK_APP_SECRET="xxxxxxxxxxxxxxxx"
 ```
 
-**方式二**：通过技能配置（需先安装插件，配置后重启会话）：
+**方式二**：通过技能配置（需先安装插件--见步骤3/4。通过技能配置后重启会话，未配置前会提示 MCP 连接失败）：
 
 ```
 /feishu-channel-configure <appId> <appSecret>
 ```
 
-凭证写入 `~/.claude/channels/feishu/.env`。服务器启动时读取，优先级高于环境变量。
+凭证写入 `~/.claude/channels/feishu/.env`。服务器启动时读取，优先级高于环境变量。执行上述 skill 命令后重启下 Claude Code。
 
 国际版（Lark）额外设置：
 
 ```bash
 export MY_LARK_BRAND="lark"
 ```
+
 
 ### 3. 安装插件
 
@@ -73,7 +74,7 @@ claude --dangerously-skip-permissions --dangerously-load-development-channels pl
 建议设置 alias：
 
 ```bash
-alias claude-feishu='claude --dangerously-skip-permissions --dangerously-load-development-channels plugin:feishu-channel@g-claude-code-plugins'
+alias claude-feishu='claude --dangerously-load-development-channels plugin:feishu-channel@g-claude-code-plugins'
 ```
 
 > **权限提示**：如果不使用 `--dangerously-skip-permissions`，Claude 执行飞书技能时会频繁在终端弹出授权确认（每次调用脚本、读写文件都需要手动批准），体验较差。推荐方案：
@@ -270,8 +271,6 @@ grep 'sandbox-' ~/.claude/channels/feishu/logs/latest
 
 日志内容包括：服务器启动/关闭、消息收发、gate 判定、表情操作、沙盒 ALLOW/BLOCK 记录。
 
-如果启用了 sandbox 模式（通过 `npx @ben1849/feishu-channel sandbox apply`），文件系统和网络访问会受到 OS 级限制。
-
 ## 常见问题
 
 | 症状 | 原因 | 修复 |
@@ -286,10 +285,18 @@ grep 'sandbox-' ~/.claude/channels/feishu/logs/latest
 
 ## 安全沙盒（推荐）
 
-通过 Claude Code 内置 sandbox（macOS Seatbelt / Linux bubblewrap）实现 OS 级文件系统和网络隔离：
+Claude Code 内置了 OS 级 sandbox（macOS Seatbelt / Linux bubblewrap），可以限制文件系统读写和网络访问。通过飞书访问 Claude 时**强烈建议开启**，防止 prompt injection 等安全风险。
+
+### 方式一：使用 Claude Code 原生 sandbox
+
+在终端运行 `/sandbox` 命令，选择 Auto-allow 模式即可开启。详见 [Claude Code 官方文档](https://code.claude.com/docs/en/sandboxing)。
+
+### 方式二：使用配置管理工具（推荐）
+
+[`@ben1849/feishu-channel`](https://www.npmjs.com/package/@ben1849/feishu-channel) 提供了针对飞书场景优化的 sandbox 配置模板，一键配置 sandbox + permissions + `dontAsk` 模式：
 
 ```bash
-# 交互模式
+# 交互模式（箭头键选择）
 npx @ben1849/feishu-channel sandbox
 
 # 直接应用安全模式
@@ -297,11 +304,11 @@ npx @ben1849/feishu-channel sandbox apply default
 ```
 
 预置模板：
-- **default** — 安全模式：只读命令 + skill 脚本，`dontAsk` 静默拒绝未授权操作
-- **dev** — 开发模式：完整开发工具，权限更宽松
+- **default** — 安全模式：sandbox 开启 + `dontAsk` 静默拒绝未授权操作 + 只读命令 + skill 脚本
+- **dev** — 开发模式：sandbox 开启 + 完整开发工具
 - **dangerously-open** — 无限制（等同 `--dangerously-skip-permissions`）
 
-详见 [@ben1849/feishu-channel](https://www.npmjs.com/package/@ben1849/feishu-channel)。
+配置写入 `.claude/settings.local.json`，必须在启动 Claude Code 的同一目录下执行。
 
 ## 开发
 
