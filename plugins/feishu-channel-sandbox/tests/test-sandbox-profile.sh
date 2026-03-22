@@ -74,24 +74,11 @@ $1
 # Setup: simulate realistic user settings.local.json
 # ═══════════════════════════════════════════════════════
 
-INITIAL_SETTINGS='{
-  "permissions": {
-    "allow": [
-      "Bash(gh repo:*)",
-      "WebFetch(domain:www.npmjs.com)"
-    ],
-    "defaultMode": "default"
-  },
-  "enabledPlugins": {
-    "skill-creator@claude-plugins-official": true,
-    "claude-md-management@claude-plugins-official": true
-  },
-  "effortLevel": "high"
-}'
+FIXTURES="$REPO_ROOT/plugins/feishu-channel-sandbox/tests/fixtures"
 
 echo "=== 0. Setup: write initial user config ==="
 mkdir -p .claude
-echo "$INITIAL_SETTINGS" > "$SETTINGS"
+cp "$FIXTURES/initial-user-settings.json" "$SETTINGS"
 snapshot "00-initial-user-config"
 
 # ═══════════════════════════════════════════════════════
