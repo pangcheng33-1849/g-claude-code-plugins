@@ -270,7 +270,7 @@ grep 'sandbox-' ~/.claude/channels/feishu/logs/latest
 
 日志内容包括：服务器启动/关闭、消息收发、gate 判定、表情操作、沙盒 ALLOW/BLOCK 记录。
 
-如果安装了 feishu-channel-sandbox，沙盒的拦截日志会写入同一个会话文件，便于统一排查。
+如果启用了 sandbox 模式（通过 `npx @ben1849/feishu-channel sandbox apply`），文件系统和网络访问会受到 OS 级限制。
 
 ## 常见问题
 
@@ -284,22 +284,24 @@ grep 'sandbox-' ~/.claude/channels/feishu/logs/latest
 | 消息延迟 | WebSocket 长连接偶有延迟 | 正常现象，无需处理 |
 | 代码更新后无效 | 插件缓存未刷新 | `/plugin install` 重新安装 + `/mcp` 重连 |
 
-## 安全沙盒（可选）
+## 安全沙盒（推荐）
 
-如果需要限制飞书会话的文件访问范围，可以安装独立的沙盒插件：
+通过 Claude Code 内置 sandbox（macOS Seatbelt / Linux bubblewrap）实现 OS 级文件系统和网络隔离：
 
 ```bash
-/plugin install feishu-channel-sandbox@g-claude-code-plugins
+# 交互模式
+npx @ben1849/feishu-channel sandbox
+
+# 直接应用安全模式
+npx @ben1849/feishu-channel sandbox apply default
 ```
 
-安装后通过 PreToolUse hook 拦截：
+预置模板：
+- **default** — 安全模式：只读命令 + skill 脚本，`dontAsk` 静默拒绝未授权操作
+- **dev** — 开发模式：完整开发工具，权限更宽松
+- **dangerously-open** — 无限制（等同 `--dangerously-skip-permissions`）
 
-- **文件访问**（Read/Write/Edit）：只允许访问工作目录和 `sandbox.conf` 中配置的路径
-- **Bash 命令**：两层检查 — 命令前缀白名单 + 命令中的路径白名单，防止通过 `cat`、`ls` 等命令绕过文件限制
-
-不需要时 `/plugin disable feishu-channel-sandbox` 即可关闭，不影响频道功能。
-
-详见 [feishu-channel-sandbox](../feishu-channel-sandbox)。
+详见 [@ben1849/feishu-channel](https://www.npmjs.com/package/@ben1849/feishu-channel)。
 
 ## 开发
 
