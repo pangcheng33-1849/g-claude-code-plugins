@@ -222,40 +222,43 @@ function cmdReset() {
   const sp = settingsPath();
   let settings = loadJson(sp);
 
+  // Try to find the profile data for precise rule removal
   const old = getActive();
+  let profileData = null;
+
+  // 1. From active record
   if (old.name) {
-    let oldData = null;
-    if (old.path && fs.existsSync(old.path)) oldData = loadJson(old.path);
+    if (old.path && fs.existsSync(old.path)) profileData = loadJson(old.path);
     else {
       const fallback = profilePath(old.name);
-      if (fs.existsSync(fallback)) oldData = loadJson(fallback);
+      if (fs.existsSync(fallback)) profileData = loadJson(fallback);
     }
-    if (oldData) settings = removeProfileRules(settings, oldData);
-    else delete settings.sandbox;
+  }
+
+  // 2. No active or file missing — try matching sandbox config to a preset
+  if (!profileData && settings.sandbox) {
+    for (const preset of PRESETS) {
+      const p = path.join(PRESET_PROFILES_DIR, `${preset}.json`);
+      if (!fs.existsSync(p)) continue;
+      const data = loadJson(p);
+      if (data.sandbox && JSON.stringify(data.sandbox) === JSON.stringify(settings.sandbox)) {
+        profileData = data;
+        break;
+      }
+    }
+  }
+
+  // Apply removal
+  if (profileData) {
+    settings = removeProfileRules(settings, profileData);
   } else {
-    // No active record — try matching sandbox config to a preset
-    let cleaned = false;
-    if (settings.sandbox) {
-      for (const preset of PRESETS) {
-        const p = path.join(PRESET_PROFILES_DIR, `${preset}.json`);
-        if (!fs.existsSync(p)) continue;
-        const data = loadJson(p);
-        if (data.sandbox && JSON.stringify(data.sandbox) === JSON.stringify(settings.sandbox)) {
-          settings = removeProfileRules(settings, data);
-          cleaned = true;
-          break;
-        }
-      }
-    }
-    if (!cleaned) {
-      // Can't match or no sandbox — force clean all sandbox-related config
-      delete settings.sandbox;
-      if (settings.permissions) {
-        delete settings.permissions.allow;
-        delete settings.permissions.deny;
-        delete settings.permissions.defaultMode;
-        if (Object.keys(settings.permissions).length === 0) delete settings.permissions;
-      }
+    // Force clean all sandbox-related config
+    delete settings.sandbox;
+    if (settings.permissions) {
+      delete settings.permissions.allow;
+      delete settings.permissions.deny;
+      delete settings.permissions.defaultMode;
+      if (Object.keys(settings.permissions).length === 0) delete settings.permissions;
     }
   }
 
