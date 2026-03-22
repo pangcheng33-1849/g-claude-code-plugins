@@ -19,6 +19,9 @@
         "~/.gitignore_global",
         "~/.ssh"
       ]
+    },
+    "network": {
+      "allowedDomains": ["*.com", "*.org", "*.io", "*.net", "*.dev", "*.cn", "*.cc"]
     }
   },
   "permissions": {
