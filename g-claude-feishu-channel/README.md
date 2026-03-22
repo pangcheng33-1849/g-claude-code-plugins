@@ -1,4 +1,4 @@
-# g-claude-feishu-channel
+# @ben1849/feishu-channel
 
 CLI tools for [feishu-channel](../plugins/feishu-channel) — 管理 Claude Code 内置 sandbox 的安全配置。
 
@@ -6,10 +6,10 @@ CLI tools for [feishu-channel](../plugins/feishu-channel) — 管理 Claude Code
 
 ```bash
 # 从 npm（发布后）
-npx g-claude-feishu-channel sandbox apply default
+npx @ben1849/feishu-channel sandbox apply default
 
 # 本地使用
-npx ./g-claude-feishu-channel sandbox apply default
+npx ./@ben1849/feishu-channel sandbox apply default
 ```
 
 ## Sandbox Profile 管理
@@ -18,19 +18,19 @@ npx ./g-claude-feishu-channel sandbox apply default
 
 ```bash
 # 应用安全模式（推荐飞书频道日常使用）
-npx g-claude-feishu-channel sandbox apply default
+npx @ben1849/feishu-channel sandbox apply default
 
 # 应用开发模式
-npx g-claude-feishu-channel sandbox apply dev
+npx @ben1849/feishu-channel sandbox apply dev
 
 # 无限制模式（仅在信任环境使用）
-npx g-claude-feishu-channel sandbox apply dangerously-open
+npx @ben1849/feishu-channel sandbox apply dangerously-open
 
 # 查看当前配置
-npx g-claude-feishu-channel sandbox show
+npx @ben1849/feishu-channel sandbox show
 
 # 移除 sandbox 配置
-npx g-claude-feishu-channel sandbox reset
+npx @ben1849/feishu-channel sandbox reset
 ```
 
 配置写入 `.claude/settings.local.json`（个人、gitignored），Claude Code 自动重载。
@@ -68,15 +68,15 @@ npx g-claude-feishu-channel sandbox reset
 
 ```bash
 # 基于 dev 创建
-npx g-claude-feishu-channel sandbox create myprofile dev
+npx @ben1849/feishu-channel sandbox create myprofile dev
 
 # 编辑（文件在 ~/.claude/channels/feishu/sandbox-profile/profiles/myprofile.json）
 
 # 应用
-npx g-claude-feishu-channel sandbox apply myprofile
+npx @ben1849/feishu-channel sandbox apply myprofile
 
 # 删除
-npx g-claude-feishu-channel sandbox delete myprofile
+npx @ben1849/feishu-channel sandbox delete myprofile
 ```
 
 预置模板（default/dev/dangerously-open）不可删除。

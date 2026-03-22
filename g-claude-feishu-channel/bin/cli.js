@@ -526,16 +526,16 @@ Presets:
   else if (sub === "delete") { if (!args[2]) { console.error("Usage: sandbox delete <name> [--force]"); process.exit(1); } cmdDelete(args[2], { force: args.includes("--force") }); }
   else { console.error(`Unknown sandbox command: ${sub}\nAvailable: list, show, apply, reset, create, delete`); process.exit(1); }
 } else if (!cmd || cmd === "--help" || cmd === "-h") {
-  console.log(`g-claude-feishu-channel — CLI tools for feishu-channel
+  console.log(`feishu-channel — CLI tools for feishu-channel
 
 Usage:
-  g-claude-feishu-channel sandbox              Interactive sandbox profile manager
-  g-claude-feishu-channel sandbox list         List profiles and current config
-  g-claude-feishu-channel sandbox show [name]  Show current config or a profile
-  g-claude-feishu-channel sandbox apply <name> Apply a sandbox profile
-  g-claude-feishu-channel sandbox reset        Remove sandbox configuration
-  g-claude-feishu-channel sandbox create <n>   Create custom profile (base: dev)
-  g-claude-feishu-channel sandbox delete <n>   Delete custom profile
+  feishu-channel sandbox              Interactive sandbox profile manager
+  feishu-channel sandbox list         List profiles and current config
+  feishu-channel sandbox show [name]  Show current config or a profile
+  feishu-channel sandbox apply <name> Apply a sandbox profile
+  feishu-channel sandbox reset        Remove sandbox configuration
+  feishu-channel sandbox create <n>   Create custom profile (base: dev)
+  feishu-channel sandbox delete <n>   Delete custom profile
 
 Profiles: default, dev, dangerously-open`);
 } else {

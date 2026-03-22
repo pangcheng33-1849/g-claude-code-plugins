@@ -1,9 +1,9 @@
 {
-  "name": "g-claude-feishu-channel",
+  "name": "@ben1849/feishu-channel",
   "version": "1.0.0",
   "description": "CLI tools for feishu-channel — sandbox profile management for Claude Code",
   "bin": {
-    "g-claude-feishu-channel": "./bin/cli.js"
+    "feishu-channel": "./bin/cli.js"
   },
   "files": [
     "bin/",
@@ -32,6 +32,9 @@
   "homepage": "https://github.com/pangcheng1849/g-claude-code-plugins/tree/main/g-claude-feishu-channel",
   "bugs": {
     "url": "https://github.com/pangcheng1849/g-claude-code-plugins/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@clack/prompts": "^1.1.0"
