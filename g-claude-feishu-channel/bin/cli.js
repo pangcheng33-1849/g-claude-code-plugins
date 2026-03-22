@@ -350,7 +350,10 @@ async function interactiveSandbox() {
 
   intro("🔒 Sandbox Profile Manager");
 
+  let firstLoop = true;
   while (true) {
+    if (!firstLoop) console.clear();
+    firstLoop = false;
     const active = getActive();
     note(
       `Profile:  ${active.name || "(none)"}\nSettings: ${settingsPath()}`,
