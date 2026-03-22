@@ -46,8 +46,8 @@
     {
       "name": "feishu-channel-sandbox",
       "source": "./plugins/feishu-channel-sandbox",
-      "description": "Optional sandbox for feishu-channel — restricts file and command access when Claude is accessed via Feishu",
-      "version": "0.2.0",
+      "description": "Sandbox profile templates for feishu-channel — manages Claude Code native sandbox settings",
+      "version": "1.0.0",
       "author": {
         "name": "cheng-pang"
       },

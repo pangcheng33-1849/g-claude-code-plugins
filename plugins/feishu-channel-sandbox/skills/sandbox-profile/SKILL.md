@@ -1,199 +1,73 @@
 ---
-name: feishu-channel-sandbox-profile
-description: Switch feishu sandbox profile (default/dev).
-user-invocable: true
-allowed-tools:
-  - Bash
-  - Read
-  - Write
+name: sandbox-profile
+description: 当用户提出"切换沙盒模式""应用安全配置""查看沙盒配置""管理 sandbox profile"时使用此 skill。管理 Claude Code 内置 sandbox 的 settings.json 配置模板。
 ---
 
-# /feishu-channel-sandbox-profile — 沙盒配置集管理
+# Sandbox Profile 管理
 
-活跃配置是指向 `~/.claude/channels/feishu/profiles/` 下对应文件的软链接。
-每个 profile 由两个文件组成：`{name}-bash.conf`（命令白名单）和 `{name}-sandbox.conf`（路径白名单）。
+管理 Claude Code 内置 sandbox 的配置模板。通过读写 `.claude/settings.local.json` 应用预置或自定义的安全配置。
 
-常量定义（后续指令中直接使用）：
-- `PROFILES=~/.claude/channels/feishu/profiles`
-- `CONF=~/.claude/channels/feishu`
-- 预设 profile（不可编辑/删除）：`default`、`dev`
+## 命令
 
-传入参数：`$ARGUMENTS`
+根据用户输入的参数执行对应操作：
 
----
+### `list`（默认，无参数时执行）
 
-## 根据第一个参数分派
+1. 读取 skill 目录下 `profiles/*.json` 列出所有可用模板
+2. 读取当前项目的 `.claude/settings.local.json`，提取 `sandbox` 和 `permissions` 部分
+3. 输出：可用模板列表 + 当前配置摘要
 
-### 无参数 — 等同于 `list`
+### `show <name>`
 
-执行下方 `list` 子命令。
+1. 如果 `<name>` 是模板名（如 `default`、`dev`、`dangerously-open`）：读取对应 `profiles/<name>.json` 并展示
+2. 如果 `<name>` 是 `current`：读取 `.claude/settings.local.json` 展示 sandbox 相关配置
 
-### `help` — 显示帮助
+### `apply <name> [--shared]`
 
-输出：
+1. 读取 `profiles/<name>.json` 模板
+2. 读取目标 settings 文件：
+   - 默认：`.claude/settings.local.json`（个人配置，gitignored）
+   - 加 `--shared`：`.claude/settings.json`（团队共享，提交到 git）
+3. 将模板的 `sandbox` 字段**整体替换**到 settings 中
+4. 将模板的 `permissions.allow` 和 `permissions.deny` **合并**到 settings 中（去重，保留 settings 中已有的其他 allow/deny 规则）
+5. 保留 settings 中所有其他字段不变
+6. 写入文件
+7. 提示用户：配置已生效，Claude Code 会自动重载
 
-```
-沙盒配置集管理
+**注意**：如果目标文件不存在，直接创建。
 
-用法：/feishu-channel-sandbox-profile <子命令> [参数]
+### `reset [--shared]`
 
-子命令：
-  (无参数)             查看当前配置集及所有可用配置集
-  list                 同上
-  show [name]          显示指定配置集的详细内容（默认为当前活跃）
-  <name>               切换到指定配置集（如 default、dev、或自定义名称）
-  create <name> [base] 基于 base（默认 dev）创建自定义配置集
-  edit <name>          编辑自定义配置集（不可编辑 default/dev）
-  delete <name>        删除自定义配置集（不可删除 default/dev）
-  help                 显示此帮助
+1. 读取目标 settings 文件
+2. 删除 `sandbox` 字段
+3. 删除 `permissions.allow` 和 `permissions.deny` 字段（保留 `permissions` 下其他字段如 `defaultMode`）
+4. 写入文件
+5. 提示用户：sandbox 配置已移除
 
-示例：
-  /feishu-channel-sandbox-profile dev              切换到开发模式
-  /feishu-channel-sandbox-profile create fe dev    基于 dev 创建名为 fe 的配置集
-  /feishu-channel-sandbox-profile edit fe          编辑 fe 配置集
-  /feishu-channel-sandbox-profile fe               切换到 fe
-  /feishu-channel-sandbox-profile delete fe        删除 fe
-```
+### `create <name> [base]`
 
-### `list` — 列出所有配置集
+1. `base` 默认为 `dev`
+2. 复制 `profiles/<base>.json` 为 `profiles/<name>.json`
+3. 提示用户可以编辑新模板
 
-运行：
-```bash
-readlink ~/.claude/channels/feishu/sandbox-bash.conf 2>/dev/null; ls ~/.claude/channels/feishu/profiles/*-bash.conf 2>/dev/null
-```
+预置模板（`default`、`dev`、`dangerously-open`）不可被覆盖。
 
-根据输出：
-1. 从 `readlink` 结果提取当前活跃 profile 名（文件名去掉 `-bash.conf`）
-2. 从 `ls` 结果提取所有 profile 名
-3. 标注预设（default、dev）和自定义
-4. 标注当前活跃
+### `delete <name>`
 
-输出示例：
+1. 检查 `<name>` 不是预置模板
+2. 删除 `profiles/<name>.json`
 
-```
-当前沙盒配置集：dev
+## 预置模板说明
 
-可用配置集：
-  default    只读模式（预设）
-  dev        完整开发命令（预设）← 当前
-  frontend   自定义
+| 模板 | 场景 | sandbox | 网络 | 文件写入 |
+|------|------|---------|------|----------|
+| `default` | 飞书频道安全模式 | 开启，关闭逃逸口 | 飞书域名放行，其他弹窗 | 仅 cwd + feishu 目录 + /tmp |
+| `dev` | 开发调试 | 开启，允许逃逸口 | 全部放开 | cwd + 包管理器缓存 + 开发工具 |
+| `dangerously-open` | 无限制 | 关闭 | 无限制 | 无限制 |
 
-切换：/feishu-channel-sandbox-profile <名称>
-管理：/feishu-channel-sandbox-profile help
-```
+## 执行规则
 
-### `show` 或 `show <name>` — 显示配置集内容
-
-如果没有指定 name，先通过 `readlink` 获取当前活跃 profile 名。
-
-用 Read 工具读取 `PROFILES/{name}-bash.conf` 和 `PROFILES/{name}-sandbox.conf`，将内容展示给用户。
-
-输出格式：
-
-```
-配置集：dev
-
-── 命令白名单（sandbox-bash.conf）──
-[文件内容]
-
-── 路径白名单（sandbox.conf）──
-[文件内容]
-```
-
-### `create <name>` 或 `create <name> <base>` — 创建自定义配置集
-
-参数解析：第一个参数为 name，第二个参数为 base（默认 `dev`）。
-
-前置检查：
-- name 不能是 `default` 或 `dev`（提示：预设配置集不可覆盖）
-- name 只允许字母、数字、连字符（提示命名规则）
-- `PROFILES/{name}-bash.conf` 不能已存在（提示：已存在，用 edit 修改或 delete 后重建）
-- `PROFILES/{base}-bash.conf` 必须存在（提示：基础配置集不存在）
-
-步骤：
-1. 运行 `cp PROFILES/{base}-bash.conf PROFILES/{name}-bash.conf && cp PROFILES/{base}-sandbox.conf PROFILES/{name}-sandbox.conf`
-2. 用 Read 工具读取两个新文件
-3. 如果用户在 `$ARGUMENTS` 中提供了额外描述（create name base 之后的文本），根据描述自动编辑配置（用 Write 工具写入修改后内容）。如果没有额外描述，提示用户可以用 `/feishu-channel-sandbox-profile edit {name}` 定制。
-4. 输出确认：
-
-```
-已创建配置集：{name}（基于 {base}）
-
-切换到此配置集：/feishu-channel-sandbox-profile {name}
-编辑此配置集：/feishu-channel-sandbox-profile edit {name}
-```
-
-### `edit <name>` — 编辑自定义配置集
-
-前置检查：
-- name 不能是 `default` 或 `dev`（提示：预设配置集不可编辑，用 create 基于它创建自定义版本）
-- `PROFILES/{name}-bash.conf` 必须存在（提示：配置集不存在，用 create 创建）
-
-步骤：
-1. 用 Read 工具读取 `PROFILES/{name}-bash.conf` 和 `PROFILES/{name}-sandbox.conf`
-2. 展示当前内容
-3. 如果用户在 `$ARGUMENTS` 中 edit name 之后提供了修改描述，根据描述自动修改并用 Write 写入。否则询问用户想修改什么。
-4. 写入修改后内容
-5. 如果当前软链接指向该 profile，提示已即时生效
-
-### `delete <name>` — 删除自定义配置集
-
-前置检查：
-- name 不能是 `default` 或 `dev`（提示：预设配置集不可删除）
-- `PROFILES/{name}-bash.conf` 必须存在（提示：配置集不存在）
-
-步骤：
-1. 检查当前是否正在使用该 profile（`readlink` 检查）。如果是，先切换到 default。
-2. 运行 `rm PROFILES/{name}-bash.conf PROFILES/{name}-sandbox.conf`
-3. 输出确认
-
-### `default` — 切换到默认只读配置
-
-运行：
-```bash
-ln -sf ~/.claude/channels/feishu/profiles/default-sandbox.conf ~/.claude/channels/feishu/sandbox.conf && ln -sf ~/.claude/channels/feishu/profiles/default-bash.conf ~/.claude/channels/feishu/sandbox-bash.conf
-```
-
-输出：
-
-```
-已恢复 default 配置集（只读模式）。
-
-命令限制为：ls, cat, grep, git status/log/diff 等只读操作 + 插件/skill 脚本执行（限定目录和扩展名）
-路径限制为：项目目录、~/.claude/channels/feishu、~/.claude/plugins、*/.claude/skills|commands|agents、/tmp
-
-切换到开发模式：/feishu-channel-sandbox-profile dev
-```
-
-### `dev` — 切换到开发配置
-
-运行：
-```bash
-ln -sf ~/.claude/channels/feishu/profiles/dev-sandbox.conf ~/.claude/channels/feishu/sandbox.conf && ln -sf ~/.claude/channels/feishu/profiles/dev-bash.conf ~/.claude/channels/feishu/sandbox-bash.conf
-```
-
-输出：
-
-```
-已切换到 dev 配置集（完整开发命令）。
-
-新增命令：git（完整）、npm/bun/yarn/pnpm、make/cmake、xcodebuild/pod、adb/gradle、curl、docker 等
-新增路径：/usr/local、~/.npm、~/.bun、~/.cargo、~/.ssh 等
-
-所有命令仍受路径白名单约束，只能操作项目目录和已授权路径。
-恢复只读模式：/feishu-channel-sandbox-profile default
-```
-
-### 其他 — 切换到指定配置集
-
-检查 `PROFILES/{参数}-bash.conf` 是否存在：
-- 存在 → 运行 `ln -sf` 切换（同 default/dev 的模式），输出确认
-- 不存在 → 输出：
-
-```
-未知配置集：{参数}
-
-查看可用配置集：/feishu-channel-sandbox-profile list
-创建新配置集：/feishu-channel-sandbox-profile create {参数} dev
-查看帮助：/feishu-channel-sandbox-profile help
-```
+- 所有操作通过 Read/Write 工具直接读写 JSON 文件完成
+- 不依赖任何脚本或 hook
+- 合并 JSON 时使用深度合并，数组去重
+- 写入前确认文件路径正确（`.claude/settings.local.json` 或 `.claude/settings.json`）
