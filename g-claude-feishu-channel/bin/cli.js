@@ -6,11 +6,20 @@ const path = require("path");
 const os = require("os");
 
 // ── Paths ──
+const crypto = require("crypto");
 const STATE_DIR = path.join(os.homedir(), ".claude", "channels", "feishu", "sandbox-profile");
-const ACTIVE_FILE = path.join(STATE_DIR, "active");
+const ACTIVE_DIR = path.join(STATE_DIR, "active");
 const CUSTOM_PROFILES_DIR = path.join(STATE_DIR, "profiles");
 const PRESET_PROFILES_DIR = path.join(__dirname, "..", "profiles");
 const PRESETS = new Set(["default", "dev", "dangerously-open"]);
+
+function projectHash() {
+  return crypto.createHash("md5").update(process.cwd()).digest("hex").slice(0, 12);
+}
+
+function activeFilePath() {
+  return path.join(ACTIVE_DIR, `${projectHash()}.json`);
+}
 
 // ── Helpers ──
 function loadJson(filePath) {
@@ -54,19 +63,23 @@ function listProfiles() {
 }
 
 function getActive() {
-  if (!fs.existsSync(ACTIVE_FILE)) return { name: null, path: null };
-  const line = fs.readFileSync(ACTIVE_FILE, "utf-8").trim();
-  if (!line) return { name: null, path: null };
-  const name = path.basename(line, ".json");
-  return { name, path: line };
+  const f = activeFilePath();
+  if (!fs.existsSync(f)) return { name: null, path: null };
+  const data = loadJson(f);
+  return { name: data.profile || null, path: data.profile_path || null };
 }
 
 function setActive(name, filePath) {
-  fs.mkdirSync(STATE_DIR, { recursive: true });
+  const f = activeFilePath();
+  fs.mkdirSync(ACTIVE_DIR, { recursive: true });
   if (name && filePath) {
-    fs.writeFileSync(ACTIVE_FILE, path.resolve(filePath) + "\n", "utf-8");
-  } else if (fs.existsSync(ACTIVE_FILE)) {
-    fs.unlinkSync(ACTIVE_FILE);
+    saveJson(f, {
+      project: process.cwd(),
+      profile: name,
+      profile_path: path.resolve(filePath),
+    });
+  } else if (fs.existsSync(f)) {
+    fs.unlinkSync(f);
   }
 }
 
