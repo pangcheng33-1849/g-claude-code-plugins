@@ -440,7 +440,16 @@ async function interactiveSandbox() {
       });
       if (isCancel(base)) continue;
       cmdCreate(name, base);
-      outro(`Profile '${name}' created from '${base}'.`);
+      const { confirm } = require("@clack/prompts");
+      const applyNow = await confirm({
+        message: `Apply '${name}' to current project now?`,
+      });
+      if (!isCancel(applyNow) && applyNow) {
+        cmdApply(name);
+        outro(`Profile '${name}' created and applied.`);
+      } else {
+        outro(`Profile '${name}' created from '${base}'.`);
+      }
       return;
 
     } else if (action === "delete") {
