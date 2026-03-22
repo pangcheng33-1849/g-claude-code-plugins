@@ -301,7 +301,15 @@ function cmdDelete(name) {
     process.exit(1);
   }
   const active = getActive();
-  if (active.name === name) setActive(null);
+  if (active.name === name) {
+    // Remove profile rules from settings before deleting the file
+    const sp = settingsPath();
+    let settings = loadJson(sp);
+    const profileData = loadJson(target);
+    settings = removeProfileRules(settings, profileData);
+    saveJson(sp, settings);
+    setActive(null);
+  }
   fs.unlinkSync(target);
 
   console.log(JSON.stringify({
