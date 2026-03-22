@@ -49,6 +49,8 @@
     ],
     "defaultMode": "dontAsk",
     "deny": [
+      "Edit(.claude/settings*)",
+      "Write(.claude/settings*)",
       "Bash(rm -rf *)",
       "Bash(git push *)",
       "Bash(git reset --hard *)",
