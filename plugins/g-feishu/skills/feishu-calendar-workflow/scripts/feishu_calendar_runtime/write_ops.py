@@ -333,3 +333,49 @@ def cmd_delete_event(args: argparse.Namespace) -> None:
             deleted=True,
         )
     )
+
+
+def cmd_add_event_attendees(args: argparse.Namespace) -> None:
+    token, auth_mode = resolve_token(
+        user_access_token=args.user_access_token,
+        tenant_access_token=args.tenant_access_token,
+        use_tenant_token=args.use_tenant_token,
+        command_name="add-event-attendees",
+    )
+    attendees: list[dict[str, object]] = []
+    for open_id in getattr(args, "attendee_open_id", []) or []:
+        attendees.append({"type": "user", "user_id": open_id})
+    for chat_id in getattr(args, "attendee_chat_id", []) or []:
+        attendees.append({"type": "chat", "chat_id": chat_id})
+    for email in getattr(args, "attendee_email", []) or []:
+        attendees.append({"type": "third_party", "third_party_email": email})
+    if not attendees:
+        fail(
+            "add-event-attendees requires at least one attendee. "
+            "Pass --attendee-open-id, --attendee-chat-id, or --attendee-email.",
+            api_alias="calendar_v4_calendarEventAttendee_create",
+            auth_mode=auth_mode,
+        )
+    need_notification = not getattr(args, "no_notification", False)
+    response = calendar_request(
+        method="POST",
+        path=f"/calendar/v4/calendars/{urllib.parse.quote(args.calendar_id, safe='')}/events/{urllib.parse.quote(args.event_id, safe='')}/attendees",
+        token=token,
+        query={"user_id_type": "open_id"},
+        body={
+            "attendees": attendees,
+            "need_notification": need_notification,
+        },
+    )
+    ensure_success(response, api_alias="calendar_v4_calendarEventAttendee_create", auth_mode=auth_mode)
+    print_json(
+        normalize_result(
+            api_alias="calendar_v4_calendarEventAttendee_create",
+            auth_mode=auth_mode,
+            response=response,
+            calendar_id=args.calendar_id,
+            event_id=args.event_id,
+            attendees_added=attendees,
+            attendees_result=response.get("data", {}).get("attendees", []),
+        )
+    )

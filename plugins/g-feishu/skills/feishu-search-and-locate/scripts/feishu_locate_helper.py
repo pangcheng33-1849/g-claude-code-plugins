@@ -185,6 +185,49 @@ def cmd_search_chat(args: argparse.Namespace) -> None:
     )
 
 
+def cmd_search_message(args: argparse.Namespace) -> None:
+    token, auth_mode = require_user_token(args.user_access_token)
+    body: dict[str, object] = {"query": args.query}
+    if args.chat_id:
+        body["chat_ids"] = args.chat_id
+    if args.from_id:
+        body["from_ids"] = args.from_id
+    if args.at_chatter_id:
+        body["at_chatter_ids"] = args.at_chatter_id
+    if args.message_type is not None:
+        body["message_type"] = args.message_type
+    if args.from_type is not None:
+        body["from_type"] = args.from_type
+    if args.chat_type is not None:
+        body["chat_type"] = args.chat_type
+    if args.start_time is not None:
+        body["start_time"] = args.start_time
+    if args.end_time is not None:
+        body["end_time"] = args.end_time
+    query_params: dict[str, object] = {
+        "page_size": args.page_size,
+        "user_id_type": "open_id",
+    }
+    if args.page_token is not None:
+        query_params["page_token"] = args.page_token
+    qs = urllib.parse.urlencode({k: v for k, v in query_params.items() if v is not None})
+    url = f"https://open.feishu.cn/open-apis/search/v2/message?{qs}"
+    payload = request_json_post(url, body, token)
+    data = payload.get("data", {})
+    items = data.get("items", [])
+    print_json(
+        {
+            "api_alias": "search_v2_message",
+            "auth_mode": auth_mode,
+            "query": args.query,
+            "has_more": data.get("has_more", False),
+            "page_token": data.get("page_token") or "",
+            "item_count": len(items),
+            "items": items,
+        }
+    )
+
+
 def cmd_search_doc(args: argparse.Namespace) -> None:
     token, auth_mode = require_user_token(args.user_access_token)
     payload = request_json_post(
@@ -285,6 +328,25 @@ def build_parser() -> argparse.ArgumentParser:
     search_doc.add_argument("--page-token")
     search_doc.add_argument("--user-access-token", required=True, help="Use skill feishu-auth-and-scopes to obtain.")
     search_doc.set_defaults(func=cmd_search_doc)
+
+    search_message = subparsers.add_parser(
+        "search-message",
+        help="Search messages via search/v2/message.",
+        description="Search messages by keyword with optional filters for chat, sender, message type, and time range.",
+    )
+    search_message.add_argument("--query", required=True)
+    search_message.add_argument("--chat-id", action="append", help="Chat ID to filter; repeatable.")
+    search_message.add_argument("--from-id", action="append", help="Sender open_id to filter; repeatable.")
+    search_message.add_argument("--at-chatter-id", action="append", help="At-mentioned open_id to filter; repeatable.")
+    search_message.add_argument("--message-type", choices=["file", "image", "media"])
+    search_message.add_argument("--from-type", choices=["bot", "user"])
+    search_message.add_argument("--chat-type", choices=["group_chat", "p2p_chat"])
+    search_message.add_argument("--start-time", help="Unix seconds string, inclusive lower bound.")
+    search_message.add_argument("--end-time", help="Unix seconds string, inclusive upper bound.")
+    search_message.add_argument("--page-size", type=int, default=20)
+    search_message.add_argument("--page-token")
+    search_message.add_argument("--user-access-token", required=True, help="Use skill feishu-auth-and-scopes to obtain.")
+    search_message.set_defaults(func=cmd_search_message)
 
     return parser
 
