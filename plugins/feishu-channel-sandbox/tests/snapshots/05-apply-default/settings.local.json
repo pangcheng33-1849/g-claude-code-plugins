@@ -66,6 +66,7 @@
       "allowWrite": [
         "~/.claude/channels/feishu",
         "~/.claude/plugins",
+        "~/.feishu-auth-cache",
         "/tmp"
       ],
       "denyRead": [
