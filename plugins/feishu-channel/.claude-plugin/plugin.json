@@ -7,6 +7,5 @@
   },
   "license": "MIT",
   "keywords": ["feishu", "lark", "messaging", "channel", "mcp"],
-  "skills": "./skills",
-  "hooks": "./hooks/hooks.json"
+  "skills": "./skills"
 }
