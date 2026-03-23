@@ -43,6 +43,17 @@ Version is stored in two places — both must be updated together:
 
 Follow SemVer: **major** = breaking changes, **minor** = new features, **patch** = bug fixes, docs, refactors.
 
+## Git Workflow
+
+**Never commit directly to main.** Always create a feature branch for changes and submit a PR.
+
+```bash
+git checkout -b fix/short-description   # or feat/, docs/, chore/
+# ... make changes ...
+git push -u origin fix/short-description
+gh pr create
+```
+
 ## Adding a New Plugin
 
 1. Create `plugins/<name>/` with the structure above
