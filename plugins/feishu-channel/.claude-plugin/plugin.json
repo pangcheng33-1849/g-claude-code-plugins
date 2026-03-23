@@ -1,12 +1,11 @@
 {
   "name": "feishu-channel",
   "description": "Feishu/Lark channel for Claude Code — chat with Claude through Feishu messaging with built-in access control.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "author": {
     "name": "cheng-pang"
   },
   "license": "MIT",
   "keywords": ["feishu", "lark", "messaging", "channel", "mcp"],
-  "skills": "./skills",
-  "hooks": "./hooks/hooks.json"
+  "skills": "./skills"
 }

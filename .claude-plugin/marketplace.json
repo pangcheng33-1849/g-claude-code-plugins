@@ -14,7 +14,7 @@
       "name": "example-plugin",
       "source": "./plugins/example-plugin",
       "description": "An example plugin with skill, agent, and hook",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "author": {
         "name": "bytedance"
       },
@@ -36,7 +36,7 @@
       "name": "feishu-channel",
       "source": "./plugins/feishu-channel",
       "description": "Feishu/Lark channel for Claude Code — chat with Claude through Feishu messaging",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "author": {
         "name": "cheng-pang"
       },
