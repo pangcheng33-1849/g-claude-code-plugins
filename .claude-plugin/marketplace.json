@@ -25,7 +25,7 @@
       "name": "g-feishu",
       "source": "./plugins/g-feishu",
       "description": "Feishu (Lark) integration skills for Claude Code",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "author": {
         "name": "cheng-pang"
       },
@@ -36,7 +36,7 @@
       "name": "feishu-channel",
       "source": "./plugins/feishu-channel",
       "description": "Feishu/Lark channel for Claude Code — chat with Claude through Feishu messaging",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "author": {
         "name": "cheng-pang"
       },
