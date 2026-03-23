@@ -1,6 +1,6 @@
 {
   "name": "@ben1849/feishu-channel",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CLI tools for feishu-channel — sandbox profile management for Claude Code",
   "bin": {
     "feishu-channel": "./bin/cli.js"

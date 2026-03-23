@@ -77,7 +77,6 @@
     "filesystem": {
       "allowWrite": [
         "~/.claude/channels/feishu",
-        "~/.claude/plugins",
         "~/.feishu-auth-cache",
         "/tmp",
         "/usr/local",
@@ -92,7 +91,13 @@
     },
     "network": {
       "allowedDomains": [
-        "*"
+        "*.com",
+        "*.org",
+        "*.io",
+        "*.net",
+        "*.dev",
+        "*.cn",
+        "*.cc"
       ]
     }
   }

@@ -59,6 +59,8 @@
       "Bash(rm -rf /home/*)",
       "Edit(.claude/settings*)",
       "Write(.claude/settings*)",
+      "Bash(curl *)",
+      "Bash(wget *)",
       "Bash(rm -rf *)",
       "Bash(git push *)",
       "Bash(git reset --hard *)"
@@ -78,7 +80,6 @@
     "filesystem": {
       "allowWrite": [
         "~/.claude/channels/feishu",
-        "~/.claude/plugins",
         "~/.feishu-auth-cache",
         "/tmp"
       ],
@@ -90,10 +91,13 @@
     },
     "network": {
       "allowedDomains": [
-        "open.feishu.cn",
-        "*.feishu.cn",
-        "*.larkoffice.com",
-        "*.larksuite.com"
+        "*.com",
+        "*.org",
+        "*.io",
+        "*.net",
+        "*.dev",
+        "*.cn",
+        "*.cc"
       ]
     }
   }
