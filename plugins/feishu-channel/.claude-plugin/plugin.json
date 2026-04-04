@@ -3,7 +3,7 @@
   "description": "Feishu/Lark channel for Claude Code — chat with Claude through Feishu messaging with built-in access control.",
   "version": "0.3.2",
   "author": {
-    "name": "cheng-pang"
+    "name": "Ben².pc"
   },
   "license": "MIT",
   "keywords": ["feishu", "lark", "messaging", "channel", "mcp"],
