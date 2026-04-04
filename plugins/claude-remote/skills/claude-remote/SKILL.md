@@ -33,7 +33,7 @@ Before doing anything else, run cleanup to remove stale entries:
 bash <skill-dir>/scripts/session-manager.sh cleanup
 ```
 
-This checks each recorded session's Terminal window still exists and removes dead entries.
+This checks each recorded session's Terminal window still exists and removes dead entries. If any sessions were cleaned up, tell the user (e.g., "2 stale sessions were cleaned up — their Terminal windows were closed outside this tool").
 
 ### Determine Intent
 
@@ -50,20 +50,20 @@ If ambiguous, ask.
 
 ### Start Flow
 
-1. List directories under `~/Workspace`:
+1. **Try to infer from context first.** If the user's message already contains a directory name or path (e.g., "start remote in openclaw", "launch claude in ~/Workspace/my-app"), use it directly — skip the directory picker. Also detect any options mentioned naturally (e.g., "with opus model" → `--model opus`).
+
+2. Only if the directory is unclear, list directories under `~/Workspace`:
    ```bash
    bash <skill-dir>/scripts/session-manager.sh list-dirs
    ```
-   Present as a numbered list using `AskUserQuestion`. Include an option to create a new directory.
-
-2. User picks a number or says "create new" with a name.
+   Present as a numbered list via `AskUserQuestion`. Include an option to create a new directory. Note: `~/Workspace` is the default root; if it doesn't exist, ask the user for their workspace path.
 
 3. If creating new:
    ```bash
    mkdir -p ~/Workspace/<new-dir-name>
    ```
 
-4. Ask the user if they need any extra options (or detect from context). Common options:
+4. Common options (only ask if not already inferred from context):
 
    | Option | Flag | Default | Example |
    |--------|------|---------|---------|
