@@ -57,6 +57,7 @@ npx skills add https://github.com/pangcheng1849/g-claude-code-plugins --list
 | [g-feishu](./plugins/g-feishu) | Feishu (Lark) integration skills for Claude Code | 1.5.0 |
 | [feishu-channel](./plugins/feishu-channel) | Connect Claude Code to Feishu via WebSocket — chat, access control, pairing auth | 0.2.0 |
 | [xhs-research](./plugins/xhs-research) | Xiaohongshu reputation research workflow for Claude Code | 1.0.0 |
+| [claude-remote](./plugins/claude-remote) | Manage Claude Code remote-control sessions in Terminal.app | 0.1.0 |
 
 ### CLI Tools
 
