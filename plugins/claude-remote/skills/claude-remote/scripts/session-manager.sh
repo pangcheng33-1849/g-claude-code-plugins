@@ -73,35 +73,11 @@ cmd_create() {
     cmd="$cmd '${escaped_f}'"
   done
 
-  # Open Terminal with a profile that auto-closes on shell exit.
-  # Look for a profile with shellExitAction=2; fall back to default.
-  local profile
-  profile=$(python3 -c "
-import subprocess, plistlib
-r = subprocess.run(['defaults', 'export', 'com.apple.Terminal', '-'], capture_output=True)
-data = plistlib.loads(r.stdout)
-for name, p in data.get('Window Settings', {}).items():
-    if p.get('shellExitAction') == 2:
-        print(name)
-        break
-" 2>/dev/null) || true
-
+  # Open Terminal with default profile
   local wid
-  if [ -n "$profile" ]; then
-    local escaped_profile="${profile//\"/\\\"}"
-    wid=$(osascript -e "
-      tell application \"Terminal\"
-        set profileSettings to settings set \"$escaped_profile\"
-        set newTab to do script \"$cmd\"
-        set current settings of newTab to profileSettings
-        return id of window 1
-      end tell
-    " 2>&1)
-  else
-    wid=$(osascript -e "tell application \"Terminal\" to do script \"$cmd\"" 2>&1)
-    # Extract window ID from "tab 1 of window id NNNNN"
-    wid=$(echo "$wid" | grep -o 'window id [0-9]*' | grep -o '[0-9]*')
-  fi
+  wid=$(osascript -e "tell application \"Terminal\" to do script \"$cmd\"" 2>&1)
+  # Extract window ID from "tab 1 of window id NNNNN"
+  wid=$(echo "$wid" | grep -o 'window id [0-9]*' | grep -o '[0-9]*')
 
   if [ -z "$wid" ]; then
     echo "ERROR: Failed to open Terminal window"
