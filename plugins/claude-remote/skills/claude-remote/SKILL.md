@@ -1,6 +1,6 @@
 ---
 name: claude-remote
-description: Manage Claude Code remote-control sessions in Terminal.app — start, stop, and list instances. Use this skill whenever the user wants to launch a new Claude Code session for remote control (e.g., for OpenClaw or mobile access), stop a running remote session, check which sessions are active, or says things like "open a claude for remote", "start remote control", "stop that claude session", "list my remote sessions". 
+description: Manage Claude Code remote-control sessions in Terminal.app — start, stop, and list instances. Use when the user wants to launch, stop, or check remote-control sessions, or mentions OpenClaw, mobile access, or remote Claude. Triggers on "open/start/launch a claude for remote", "stop/close/kill session", "list/status sessions", "restart session".
 ---
 
 # Claude Remote Session Manager
@@ -44,6 +44,7 @@ Parse what the user wants:
 | **start** | "start", "open", "launch", "new session", "remote control" |
 | **stop** | "stop", "close", "kill", "shut down", "exit" |
 | **list** | "list", "status", "show", "which sessions", "what's running" |
+| **restart** | "restart", "relaunch", "reboot session" — stop then start same directory |
 
 If ambiguous, ask.
 
@@ -114,8 +115,8 @@ If ambiguous, ask.
 2. Present a formatted table:
    ```
    #  Session ID   Directory              Started        Window
-   1  a1b2c3       ~/Workspace/my-app     10:30 today    98905
-   2  d4e5f6       ~/Workspace/api-work   09:15 today    98820
+   1  a1b2c3d4   ~/Workspace/my-app     10:30 today    98905
+   2  e5f6a7b8   ~/Workspace/api-work   09:15 today    98820
    ```
 
 3. If no sessions: "No active remote sessions."
@@ -124,5 +125,5 @@ If ambiguous, ask.
 
 - The script uses `osascript` (AppleScript) to control Terminal.app — this only works on macOS.
 - Each session opens a **new Terminal window** (not a tab) for isolation.
-- The `exit` command is sent to the Terminal tab before closing the window, to gracefully shut down Claude Code.
+- Stop uses Terminal's native "terminate process" dialog to shut down Claude Code, then closes the window.
 - Session state is stored as individual JSON files in `~/.claude-remote/sessions/` — one file per session for atomicity.

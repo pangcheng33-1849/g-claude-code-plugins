@@ -2,13 +2,17 @@
 # Claude Remote Session Manager
 # Manages Claude Code --remote-control sessions in Terminal.app
 # State: ~/.claude-remote/sessions/<id>.json
+# Dependencies: osascript (macOS), python3 (for JSON handling)
 
 set -euo pipefail
 
 STATE_DIR="$HOME/.claude-remote/sessions"
 mkdir -p "$STATE_DIR"
 
-# Generate short random ID
+# Verify python3 is available
+command -v python3 >/dev/null 2>&1 || { echo "ERROR: python3 is required but not found"; exit 1; }
+
+# Generate short random ID (8 hex chars)
 gen_id() {
   head -c 4 /dev/urandom | xxd -p
 }
@@ -24,22 +28,80 @@ window_exists() {
   get_terminal_windows | grep -q "^${wid}$"
 }
 
+# Read a field from a session JSON file safely (no string interpolation)
+read_json_field() {
+  local file="$1" field="$2"
+  python3 -c "import json,sys; print(json.load(sys.stdin)['$field'])" < "$file"
+}
+
+# Write session JSON safely with proper escaping
+write_session_json() {
+  local file="$1" sid="$2" wid="$3" dir="$4" started="$5"
+  python3 -c "
+import json, sys
+json.dump({
+    'id': sys.argv[1],
+    'window_id': int(sys.argv[2]),
+    'directory': sys.argv[3],
+    'started_at': sys.argv[4]
+}, open(sys.argv[5], 'w'), indent=2)
+" "$sid" "$wid" "$dir" "$started" "$file"
+}
+
 cmd_create() {
   local dir="${1:?Usage: session-manager.sh create <directory> [extra-flags...]}"
   dir=$(cd "$dir" 2>/dev/null && pwd) || { echo "ERROR: Directory not found: $dir"; exit 1; }
   shift
-  local extra_flags="$*"
+
+  # Collect extra flags as an array to preserve argument boundaries
+  local -a flags=("$@")
 
   # Default to bypassPermissions if user didn't specify --permission-mode
-  if ! echo "$extra_flags" | grep -q "\-\-permission-mode"; then
-    extra_flags="--permission-mode bypassPermissions $extra_flags"
+  local has_perm=0
+  for f in "${flags[@]+"${flags[@]}"}"; do
+    [[ "$f" == "--permission-mode" ]] && has_perm=1
+  done
+  if [ "$has_perm" -eq 0 ]; then
+    flags=("--permission-mode" "bypassPermissions" "${flags[@]+"${flags[@]}"}")
   fi
 
-  # Open Terminal and run claude
+  # Build the command string safely: escape single quotes in dir and flags
+  local escaped_dir="${dir//\'/\'\\\'\'}"
+  local cmd="cd '${escaped_dir}' && claude --remote-control"
+  for f in "${flags[@]+"${flags[@]}"}"; do
+    local escaped_f="${f//\'/\'\\\'\'}"
+    cmd="$cmd '${escaped_f}'"
+  done
+
+  # Open Terminal with a profile that auto-closes on shell exit.
+  # Look for a profile with shellExitAction=2; fall back to default.
+  local profile
+  profile=$(python3 -c "
+import subprocess, plistlib
+r = subprocess.run(['defaults', 'export', 'com.apple.Terminal', '-'], capture_output=True)
+data = plistlib.loads(r.stdout)
+for name, p in data.get('Window Settings', {}).items():
+    if p.get('shellExitAction') == 2:
+        print(name)
+        break
+" 2>/dev/null) || true
+
   local wid
-  wid=$(osascript -e "tell application \"Terminal\" to do script \"cd '$dir' && claude --remote-control $extra_flags\"" 2>&1)
-  # Extract window ID from "tab 1 of window id NNNNN"
-  wid=$(echo "$wid" | grep -o 'window id [0-9]*' | grep -o '[0-9]*')
+  if [ -n "$profile" ]; then
+    local escaped_profile="${profile//\"/\\\"}"
+    wid=$(osascript -e "
+      tell application \"Terminal\"
+        set profileSettings to settings set \"$escaped_profile\"
+        set newTab to do script \"$cmd\"
+        set current settings of newTab to profileSettings
+        return id of window 1
+      end tell
+    " 2>&1)
+  else
+    wid=$(osascript -e "tell application \"Terminal\" to do script \"$cmd\"" 2>&1)
+    # Extract window ID from "tab 1 of window id NNNNN"
+    wid=$(echo "$wid" | grep -o 'window id [0-9]*' | grep -o '[0-9]*')
+  fi
 
   if [ -z "$wid" ]; then
     echo "ERROR: Failed to open Terminal window"
@@ -51,37 +113,31 @@ cmd_create() {
   local now
   now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-  cat > "$STATE_DIR/${sid}.json" <<EOF
-{
-  "id": "$sid",
-  "window_id": $wid,
-  "directory": "$dir",
-  "started_at": "$now"
-}
-EOF
+  write_session_json "$STATE_DIR/${sid}.json" "$sid" "$wid" "$dir" "$now"
 
-  echo "{\"id\":\"$sid\",\"window_id\":$wid,\"directory\":\"$dir\",\"started_at\":\"$now\"}"
+  # Output result as JSON (via python3 for safe escaping)
+  python3 -c "
+import json, sys
+print(json.dumps({
+    'id': sys.argv[1],
+    'window_id': int(sys.argv[2]),
+    'directory': sys.argv[3],
+    'started_at': sys.argv[4]
+}))
+" "$sid" "$wid" "$dir" "$now"
 }
 
 cmd_list() {
-  local found=0
-  echo "["
-  local first=1
-  for f in "$STATE_DIR"/*.json; do
-    [ -f "$f" ] || continue
-    if [ $first -eq 1 ]; then
-      first=0
-    else
-      echo ","
-    fi
-    cat "$f"
-    found=1
-  done
-  echo "]"
-  if [ $found -eq 0 ]; then
-    # Output was already "[]"
-    :
-  fi
+  python3 -c "
+import json, glob, sys, os
+sessions = []
+for f in sorted(glob.glob(os.path.join(sys.argv[1], '*.json'))):
+    try:
+        sessions.append(json.load(open(f)))
+    except (json.JSONDecodeError, KeyError):
+        pass
+print(json.dumps(sessions, indent=2))
+" "$STATE_DIR"
 }
 
 cmd_list_dirs() {
@@ -103,7 +159,7 @@ cmd_cleanup() {
   for f in "$STATE_DIR"/*.json; do
     [ -f "$f" ] || continue
     local wid
-    wid=$(python3 -c "import json; print(json.load(open('$f'))['window_id'])" 2>/dev/null) || { rm -f "$f"; removed=$((removed + 1)); continue; }
+    wid=$(read_json_field "$f" "window_id" 2>/dev/null) || { rm -f "$f"; removed=$((removed + 1)); continue; }
     if ! echo "$windows" | grep -q "^${wid}$"; then
       rm -f "$f"
       removed=$((removed + 1))
@@ -118,22 +174,45 @@ cmd_stop() {
   [ -f "$f" ] || { echo "ERROR: Session $sid not found"; exit 1; }
 
   local wid
-  wid=$(python3 -c "import json; print(json.load(open('$f'))['window_id'])")
+  wid=$(read_json_field "$f" "window_id")
 
-  # Close the window. Terminal shows a "terminate process?" dialog if claude
-  # is still running — we click "终止" (Terminate) via System Events.
+  # Check if window is already gone
+  if ! window_exists "$wid"; then
+    rm -f "$f"
+    echo "Session $sid was already terminated (window closed)"
+    return 0
+  fi
+
+  # Close the window. Terminal shows a "terminate process?" dialog if a process
+  # is running. We click the destructive button on the sheet (locale-independent
+  # via button index). After the process is killed, the window may linger in
+  # "[Process completed]" state — we send a second close to handle that.
   osascript <<APPLESCRIPT
     tell application "Terminal"
       activate
       set index of window id $wid to 1
       close window id $wid
     end tell
+    delay 0.8
+    tell application "System Events"
+      tell process "Terminal"
+        try
+          click button 2 of sheet 1 of window 1
+        end try
+      end tell
+    end tell
+    -- Wait for process termination, then close the lingering window
+    delay 1.5
+    tell application "Terminal"
+      try
+        close window id $wid
+      end try
+    end tell
     delay 0.5
     tell application "System Events"
       tell process "Terminal"
         try
-          -- Click "终止" (Terminate) button on the confirmation sheet
-          click button "终止" of sheet 1 of window 1
+          click button 2 of sheet 1 of window 1
         end try
       end tell
     end tell
@@ -148,7 +227,7 @@ cmd_stop_all() {
   for f in "$STATE_DIR"/*.json; do
     [ -f "$f" ] || continue
     local sid
-    sid=$(python3 -c "import json; print(json.load(open('$f'))['id'])")
+    sid=$(read_json_field "$f" "id")
     cmd_stop "$sid" 2>/dev/null || true
     stopped=$((stopped + 1))
   done
@@ -157,7 +236,7 @@ cmd_stop_all() {
 
 # Main dispatch
 case "${1:-help}" in
-  create)    cmd_create "${2:-}" ;;
+  create)    shift; cmd_create "$@" ;;
   list)      cmd_list ;;
   list-dirs) cmd_list_dirs ;;
   cleanup)   cmd_cleanup ;;
@@ -165,7 +244,7 @@ case "${1:-help}" in
   stop-all)  cmd_stop_all ;;
   help)
     echo "Usage: session-manager.sh <command> [args]"
-    echo "Commands: create <dir>, list, list-dirs, cleanup, stop <id>, stop-all"
+    echo "Commands: create <dir> [flags...], list, list-dirs, cleanup, stop <id>, stop-all"
     ;;
   *)
     echo "Unknown command: $1"
