@@ -22,21 +22,10 @@
       "tags": ["example", "starter"]
     },
     {
-      "name": "g-feishu",
-      "source": "./plugins/g-feishu",
-      "description": "Feishu (Lark) integration skills for Claude Code",
-      "version": "1.5.1",
-      "author": {
-        "name": "cheng-pang"
-      },
-      "category": "productivity",
-      "tags": ["feishu", "lark"]
-    },
-    {
       "name": "feishu-channel",
       "source": "./plugins/feishu-channel",
       "description": "Feishu/Lark channel for Claude Code — chat with Claude through Feishu messaging",
-      "version": "0.3.1",
+      "version": "0.3.2",
       "author": {
         "name": "cheng-pang"
       },

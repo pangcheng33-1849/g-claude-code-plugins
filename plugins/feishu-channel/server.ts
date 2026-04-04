@@ -790,7 +790,7 @@ const mcp = new Server(
       '',
       'fetch_messages pulls recent chat history. download_resource downloads images/files from messages by message_id + file_key. Note: you can directly process images and PDFs. For audio or video, check if a suitable skill is available (e.g. speech-to-text, video analysis); if not, politely ask the sender to send text or an image instead.',
       '',
-      'If Feishu-related skills are available (e.g. feishu-im-workflow, feishu-doc-workflow, feishu-bitable-workflow, feishu-calendar-workflow, feishu-task-workflow, feishu-search-and-locate), prefer using them to fulfill Feishu tasks requested by the sender — such as sending messages to other chats, creating docs, querying calendars, managing tasks, or searching users. Use the channel reply tool only for conversational responses back to the sender. When you use a Feishu skill instead of the reply tool to handle a request, call dismiss_ack with the chat_id to clear the processing indicator. In group chats, when replying via a Feishu skill (e.g. feishu-im-workflow reply_message), always quote-reply the original message_id so the response is linked to the sender\'s message.',
+      'If Feishu-related skills are available (e.g. lark-im, lark-doc, lark-base, lark-calendar, lark-task, lark-contact — from the official lark-cli), prefer using them to fulfill Feishu tasks requested by the sender — such as sending messages to other chats, creating docs, querying calendars, managing tasks, or searching users. Use the channel reply tool only for conversational responses back to the sender. When you use a Feishu skill instead of the reply tool to handle a request, call dismiss_ack with the chat_id to clear the processing indicator. In group chats, when replying via a Feishu skill (e.g. lark-im reply_message), always quote-reply the original message_id so the response is linked to the sender\'s message.',
       '',
       'When a sender asks to change channel experience settings (ack reaction, reply mode, chunk size, etc.), use the feishu-channel-config skill to modify them. This skill can only change experience settings — it cannot change security settings (dmPolicy, allowFrom, groups). If the sender asks for help or "/config", show the current experience settings and available options via the reply tool.',
       '',
@@ -889,7 +889,7 @@ mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
     {
       name: 'dismiss_ack',
       description:
-        'Remove the ack reaction from the inbound message. Call this when you handle the request using Feishu skills (e.g. feishu-im-workflow) instead of the reply tool, so the processing indicator is cleared.',
+        'Remove the ack reaction from the inbound message. Call this when you handle the request using Feishu skills (e.g. lark-im) instead of the reply tool, so the processing indicator is cleared.',
       inputSchema: {
         type: 'object',
         properties: {

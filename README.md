@@ -40,7 +40,7 @@ Recommended: use the repository URL directly with `npx skills add` for interacti
 npx skills add https://github.com/pangcheng1849/g-claude-code-plugins
 
 # Install one skill to Codex
-npx skills add https://github.com/pangcheng1849/g-claude-code-plugins -a codex -s feishu-doc-workflow
+npx skills add https://github.com/pangcheng1849/g-claude-code-plugins -a codex -s feishu-channel
 
 # Install all repository skills to Claude Code
 npx skills add https://github.com/pangcheng1849/g-claude-code-plugins -a claude-code -s '*'
@@ -54,9 +54,24 @@ npx skills add https://github.com/pangcheng1849/g-claude-code-plugins --list
 | Plugin | Description | Version |
 |--------|-------------|---------|
 | [example-plugin](./plugins/example-plugin) | An example plugin with skill, agent, and hook | 1.0.0 |
-| [g-feishu](./plugins/g-feishu) | Feishu (Lark) integration skills for Claude Code | 1.5.0 |
 | [feishu-channel](./plugins/feishu-channel) | Connect Claude Code to Feishu via WebSocket — chat, access control, pairing auth | 0.2.0 |
 | [claude-remote](./plugins/claude-remote) | Manage Claude Code remote-control sessions in Terminal.app | 0.1.0 |
+
+### Feishu / Lark Skills
+
+The `g-feishu` plugin has been removed. For Feishu (Lark) API integration, use the official **[lark-cli](https://github.com/larksuite/cli)** and its skills:
+
+```bash
+# Install lark-cli globally
+npm install -g @larksuite/cli
+
+# Install lark skills (interactive — pick what you need)
+npx skills add larksuite/cli
+
+# Or install specific skills directly
+npx skills add larksuite/cli --skill lark-im -a claude-code -y
+npx skills add larksuite/cli --skill lark-doc -a claude-code -y
+```
 
 ### CLI Tools
 

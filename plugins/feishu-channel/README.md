@@ -235,13 +235,14 @@ alias claude-feishu='claude --dangerously-load-development-channels plugin:feish
 
 ## 与飞书技能联动
 
-feishu-channel 本身提供基础的消息收发能力。如果需要更丰富的飞书功能（发消息到其他会话、创建文档、管理多维表格、查日历、创建任务、搜索用户等），可以同时安装 g-feishu 插件：
+feishu-channel 本身提供基础的消息收发能力。如果需要更丰富的飞书功能（发消息到其他会话、创建文档、管理多维表格、查日历、创建任务、搜索用户等），推荐安装官方 [lark-cli](https://github.com/larksuite/cli) 的 skills：
 
 ```bash
-/plugin install g-feishu@g-claude-code-plugins
+npm install -g @larksuite/cli
+npx skills add larksuite/cli
 ```
 
-安装后，Claude 会自动识别并优先使用这些技能完成飞书相关任务，channel 的 reply 工具仅用于对话回复。
+安装后，Claude 会自动识别并优先使用这些技能（如 lark-im、lark-doc、lark-base 等）完成飞书相关任务，channel 的 reply 工具仅用于对话回复。
 
 使用飞书技能处理请求时，Claude 会自动调用 `dismiss_ack` 清除确认表情。在群聊中，通过技能回复时仍会引用原消息。
 
