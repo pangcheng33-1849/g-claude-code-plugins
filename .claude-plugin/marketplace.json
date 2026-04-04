@@ -1,7 +1,7 @@
 {
   "name": "g-claude-code-plugins",
   "owner": {
-    "name": "cheng-pang",
+    "name": "Ben².pc",
     "email": "pangcheng33@gmail.com"
   },
   "metadata": {
@@ -16,29 +16,18 @@
       "description": "An example plugin with skill, agent, and hook",
       "version": "1.0.1",
       "author": {
-        "name": "bytedance"
+        "name": "Ben².pc"
       },
       "category": "development",
       "tags": ["example", "starter"]
     },
     {
-      "name": "g-feishu",
-      "source": "./plugins/g-feishu",
-      "description": "Feishu (Lark) integration skills for Claude Code",
-      "version": "1.5.1",
-      "author": {
-        "name": "cheng-pang"
-      },
-      "category": "productivity",
-      "tags": ["feishu", "lark"]
-    },
-    {
       "name": "feishu-channel",
       "source": "./plugins/feishu-channel",
       "description": "Feishu/Lark channel for Claude Code — chat with Claude through Feishu messaging",
-      "version": "0.3.1",
+      "version": "0.3.2",
       "author": {
-        "name": "cheng-pang"
+        "name": "Ben².pc"
       },
       "category": "messaging",
       "tags": ["feishu", "lark", "channel", "mcp"]
@@ -49,7 +38,7 @@
       "description": "Manage Claude Code remote-control sessions in Terminal.app for mobile access via OpenClaw",
       "version": "0.1.0",
       "author": {
-        "name": "cheng-pang"
+        "name": "Ben².pc"
       },
       "category": "productivity",
       "tags": ["remote-control", "terminal", "openclaw", "session-manager"]
