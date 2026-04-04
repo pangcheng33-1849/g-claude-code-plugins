@@ -57,6 +57,20 @@ npx skills add https://github.com/pangcheng1849/g-claude-code-plugins --list
 | [feishu-channel](./plugins/feishu-channel) | Connect Claude Code to Feishu via WebSocket — chat, access control, pairing auth | 0.2.0 |
 | [claude-remote](./plugins/claude-remote) | Manage Claude Code remote-control sessions in Terminal.app | 0.1.0 |
 
+### Standalone Skills
+
+Skills that live outside plugins, under `skills/` at the repo root:
+
+| Skill | Description |
+|-------|-------------|
+| [claude-code-agent](./skills/claude-code-agent) | Delegate tasks to an independent Claude Code CLI instance |
+| [codex-agent](./skills/codex-agent) | Delegate tasks to Codex (GPT-5.4) via Codex CLI |
+
+```bash
+npx skills add pangcheng1849/g-claude-code-plugins --skill claude-code-agent
+npx skills add pangcheng1849/g-claude-code-plugins --skill codex-agent
+```
+
 ### Feishu / Lark Skills
 
 The `g-feishu` plugin has been removed. For Feishu (Lark) API integration, use the official **[lark-cli](https://github.com/larksuite/cli)** and its skills:
