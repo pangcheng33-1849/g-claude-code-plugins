@@ -1,6 +1,6 @@
 # @ben1849/feishu-channel
 
-[feishu-channel](https://github.com/pangcheng1849/g-claude-code-plugins/tree/main/plugins/feishu-channel) 的配套 CLI 工具 — 管理 Claude Code 内置 sandbox 的安全配置。
+[feishu-channel](https://github.com/Ben2pc/g-claude-code-plugins/tree/main/plugins/feishu-channel) 的配套 CLI 工具 — 管理 Claude Code 内置 sandbox 的安全配置。
 
 ## 快速开始
 
