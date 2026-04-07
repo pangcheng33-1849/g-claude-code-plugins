@@ -12,7 +12,7 @@ This repository can be used in two ways:
 ### Add this marketplace
 
 ```bash
-/plugin marketplace add pangcheng1849/g-claude-code-plugins
+/plugin marketplace add Ben2pc/g-claude-code-plugins
 ```
 
 Or via local path (for development):
@@ -37,16 +37,16 @@ Recommended: use the repository URL directly with `npx skills add` for interacti
 
 ```bash
 # Recommended: interactive installation
-npx skills add https://github.com/pangcheng1849/g-claude-code-plugins
+npx skills add https://github.com/Ben2pc/g-claude-code-plugins
 
 # Install one skill to Codex
-npx skills add https://github.com/pangcheng1849/g-claude-code-plugins -a codex -s feishu-channel
+npx skills add https://github.com/Ben2pc/g-claude-code-plugins -a codex -s feishu-channel
 
 # Install all repository skills to Claude Code
-npx skills add https://github.com/pangcheng1849/g-claude-code-plugins -a claude-code -s '*'
+npx skills add https://github.com/Ben2pc/g-claude-code-plugins -a claude-code -s '*'
 
 # List available skills without installing
-npx skills add https://github.com/pangcheng1849/g-claude-code-plugins --list
+npx skills add https://github.com/Ben2pc/g-claude-code-plugins --list
 ```
 
 ## Available Plugins
@@ -67,8 +67,8 @@ Skills that live outside plugins, under `skills/` at the repo root:
 | [codex-agent](./skills/codex-agent) | Delegate tasks to Codex (GPT-5.4) via Codex CLI |
 
 ```bash
-npx skills add pangcheng1849/g-claude-code-plugins --skill claude-code-agent
-npx skills add pangcheng1849/g-claude-code-plugins --skill codex-agent
+npx skills add Ben2pc/g-claude-code-plugins --skill claude-code-agent
+npx skills add Ben2pc/g-claude-code-plugins --skill codex-agent
 ```
 
 ### Feishu / Lark Skills

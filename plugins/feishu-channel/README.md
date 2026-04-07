@@ -55,7 +55,7 @@ export MY_LARK_BRAND="lark"
 
 ```bash
 # 添加 marketplace（仅首次）
-/plugin marketplace add pangcheng1849/g-claude-code-plugins
+/plugin marketplace add Ben2pc/g-claude-code-plugins
 
 # 安装插件
 /plugin install feishu-channel@g-claude-code-plugins

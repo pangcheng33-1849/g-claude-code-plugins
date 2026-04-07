@@ -6,7 +6,7 @@ A Claude Code **plugin marketplace**. Each plugin lives under `plugins/<name>/`.
 
 ```bash
 # Install from marketplace
-/plugin marketplace add pangcheng1849/g-claude-code-plugins
+/plugin marketplace add Ben2pc/g-claude-code-plugins
 /plugin install <name>@g-claude-code-plugins
 
 # Local development
