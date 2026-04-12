@@ -1,6 +1,6 @@
 ---
 name: claude-remote
-description: Manage Claude Code remote-control sessions in Terminal.app — start, stop, and list instances. Use when the user wants to launch, stop, or check remote-control sessions, or mentions mobile access or remote Claude. Triggers on "open/start/launch a claude for remote", "stop/close/kill session", "list/status sessions", "restart session".
+description: Start, stop, list, or resume Claude Code `--remote-control` sessions in Terminal.app for mobile / remote desktop access. Triggers on "start/open/launch a remote claude", "stop/kill session", "list sessions", "continue last conversation in <dir>".
 ---
 
 # Claude Remote Session Manager
@@ -44,9 +44,8 @@ Parse what the user wants:
 | **start** | "start", "open", "launch", "new session", "remote control" |
 | **stop** | "stop", "close", "kill", "shut down", "exit" |
 | **list** | "list", "status", "show", "which sessions", "what's running" |
-| **restart** | "restart", "relaunch", "reboot session" — stop then start same directory |
 
-If ambiguous, ask.
+If ambiguous, ask. For "restart"-style requests, treat as **stop + start with `-c`** so the new session resumes the prior conversation.
 
 ### Start Flow
 
@@ -132,6 +131,19 @@ Notes:
    ```
 
 3. If no sessions: "No active remote sessions."
+
+## Examples
+
+| User says | Resolved action |
+|-----------|-----------------|
+| "start a remote claude in my-app" | `create ~/Workspace/my-app` |
+| "launch claude in ~/code/api with opus" | `create ~/code/api --model opus` |
+| "接着上次的 my-app 继续" | `create ~/Workspace/my-app -c` |
+| "open a remote session in a worktree of api-work" | `create ~/Workspace/api-work -w` |
+| "stop the my-app session" | `list` → match by directory → `stop <id>` |
+| "kill all remote sessions" | `stop-all` |
+| "what's running?" | `list` → render as table |
+| "restart the api-work session" | `stop <id>` → `create <same-dir> -c` |
 
 ## Important Notes
 
