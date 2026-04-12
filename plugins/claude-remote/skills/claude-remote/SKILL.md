@@ -1,6 +1,6 @@
 ---
 name: claude-remote
-description: Start, stop, list, or resume Claude Code `--remote-control` sessions in Terminal.app for mobile / remote desktop access. Triggers on "start/open/launch a remote claude", "stop/kill session", "list sessions", "continue last conversation in <dir>".
+description: Manage **remote-control** Claude Code sessions (i.e. `claude --remote-control`, NOT regular local sessions) running in Terminal.app — start, stop, list, or resume them for mobile / remote desktop access. Triggers on "start/open/launch a remote claude", "stop/kill remote session", "list remote sessions", "continue last remote conversation in <dir>".
 ---
 
 # Claude Remote Session Manager
