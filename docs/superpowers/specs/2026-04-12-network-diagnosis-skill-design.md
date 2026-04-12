@@ -243,6 +243,14 @@ Each recommendation must include:
 - action
 - why that action addresses the observed issue
 
+If `IPv4` and `IPv6` are geographically inconsistent, the solution set should explicitly include the `macOS` commands for disabling `IPv6` on the active network service and restoring it later.
+
+If browser-side `WebRTC` exposure is present, the solution set may include the user-approved Chrome extension:
+
+- [WebRTC Protect - Protect IP Leak](https://chromewebstore.google.com/detail/webrtc-protect-protect-ip/bkmmlbllpjdpgcgdohbaghfaecnddhni)
+
+The design should treat that extension as a `WebRTC` mitigation only, not a fix for server-visible direct-connect IPs.
+
 ### 7. Verification Links
 
 Always include:
@@ -250,6 +258,8 @@ Always include:
 - [webbrowsertools IP Address](https://webbrowsertools.com/ip-address/)
 
 Also include the external source URLs or domains used in the report so the user can re-check them manually.
+
+When `WebRTC` exposure is part of the diagnosis, also include the extension link above so the user can choose that mitigation path.
 
 ## Judgment Rules
 

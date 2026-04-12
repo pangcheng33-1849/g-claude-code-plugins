@@ -255,12 +255,41 @@ playwright-cli network
 
 建议顺序按优先级从高到低排列。
 
+如果观察到 `IPv4` 与 `IPv6` 国家/地区不一致，必须给出 `macOS` 关闭 `IPv6` 的具体方式：
+
+```bash
+networksetup -listallnetworkservices
+networksetup -setv6off "Wi-Fi"
+```
+
+如果需要恢复，补充：
+
+```bash
+networksetup -setv6automatic "Wi-Fi"
+```
+
+并明确提示用户：如果当前使用的网络服务不是 `Wi-Fi`，应先从 `networksetup -listallnetworkservices` 输出中找到正确服务名再执行。
+
+如果观察到 `Via WebRTC` 暴露了额外私网或异常公网地址，可以把 Chrome 扩展作为浏览器侧缓解选项之一：
+
+- [WebRTC Protect - Protect IP Leak](https://chromewebstore.google.com/detail/webrtc-protect-protect-ip/bkmmlbllpjdpgcgdohbaghfaecnddhni)
+
+说明要点：
+
+- 该扩展通过调整浏览器的 `WebRTC` 路由与隐私设置来减少私网和公网地址暴露
+- 它可能影响依赖 `WebRTC` 的音视频或实时通信站点
+- 只适用于 `WebRTC` 暴露问题，不解决网站通过正常直连请求看到的 `Server Response`
+
 ### 复查链接
 
 至少包含：
 
 - [webbrowsertools IP Address](https://webbrowsertools.com/ip-address/)
 - 本次用到的外部查询源链接或域名
+
+当 `WebRTC` 暴露是问题的一部分时，一并给出：
+
+- [WebRTC Protect - Protect IP Leak](https://chromewebstore.google.com/detail/webrtc-protect-protect-ip/bkmmlbllpjdpgcgdohbaghfaecnddhni)
 
 ## 5. 判读规则
 
@@ -270,6 +299,7 @@ playwright-cli network
   - 才判为浏览器侧泄露风险
 - `IPv4` 和 `IPv6` 国家/地区不同：
   - 判为地区分裂风险
+  - 解决方案优先包含 `macOS` 关闭 `IPv6` 的具体命令
 - `IPv6` 查询失败，但本地接口和路由表显示仍有 `IPv6`：
   - 写成 `IPv6 状态待核实`
 - 多个来源在 ASN / 组织 / 地区上冲突：
