@@ -41,6 +41,16 @@ codex exec resume --json --model gpt-5.4 "thread_id" "后续提问"
 
 注意：`resume` 子命令支持的 flags 与 `exec` 不同，详见下方参数表。
 
+### ⚠️ `--ephemeral`：会话不可恢复
+
+加 `--ephemeral` 后，本次会话**不会写入磁盘**（不持久化到 `~/.codex/sessions/`），因此事后**无法被 `codex exec resume` 或 `--last` 恢复**。仅在以下场景使用：
+
+- 一次性快速问答，确定不会追问
+- CI / 脚本中的临时调用，避免污染会话列表
+- 敏感任务，不希望在本地留下记录
+
+**只要后续可能需要追问，就不要加 `--ephemeral`。** 与 `claude -p --no-session-persistence` 语义对等。
+
 ## codex exec 参数
 
 | Flag | 说明 |
@@ -123,7 +133,7 @@ codex exec review [OPTIONS] [PROMPT]
 | 场景 | model | sandbox | 其他 flags |
 |------|-------|---------|-----------|
 | 复杂编码 | `gpt-5.4` | `workspace-write` | `--full-auto` |
-| 一般编码 | `gpt-5.4` | `workspace-write` | `--full-auto` |
+| 一般编码 | `gpt-5.4-mini` | `workspace-write` | `--full-auto` |
 | 代码审查 | `gpt-5.4-mini` | `read-only` | — |
 | 代码审查（review） | `gpt-5.4-mini` | — | `codex exec review --base main` |
 | 快速问答 | `gpt-5.4-mini` | `read-only` | `--skip-git-repo-check` |
@@ -135,7 +145,7 @@ codex exec review [OPTIONS] [PROMPT]
 3. **始终在目标项目目录下运行**（用 `cd` 或 `-C` 切到项目目录）
 4. **编码任务用 `--sandbox workspace-write`**：平衡安全与效率
 5. **审查任务用 `--sandbox read-only`** 或 `codex exec review`：防止意外修改
-6. **保持对话连续**：同一任务的追问复用 `thread_id`，不要每次都新建会话
+6. **保持对话连续**：同一任务的追问复用 `thread_id`，不要每次都新建会话；**只要可能追问就别加 `--ephemeral`**，否则会话不可恢复
 7. **向用户报告结果**：每次调用后，从 JSONL 中提取 Codex 的回复，简要总结给用户
 
 ## 示例

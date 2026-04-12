@@ -52,6 +52,16 @@ claude -p "后续提问" --output-format json --permission-mode bypassPermission
 
 `--continue` 自动加载当前目录最近一次会话，无需指定 session_id。
 
+### ⚠️ `--no-session-persistence`：会话不可恢复
+
+加 `--no-session-persistence` 后，本次会话**不会写入磁盘**，因此事后**无法被 `--resume` 或 `--continue` 恢复**。仅在以下场景使用：
+
+- 一次性快速问答，确定不会追问
+- CI / 脚本中的临时调用，避免污染会话列表
+- 敏感任务，不希望在本地留下记录
+
+**只要后续可能需要追问，就不要加 `--no-session-persistence`。**
+
 ## claude -p 参数
 
 ### 输出控制
@@ -101,8 +111,8 @@ claude -p "后续提问" --output-format json --permission-mode bypassPermission
 |------|------|
 | `--system-prompt PROMPT` | 替换默认系统提示词 |
 | `--append-system-prompt PROMPT` | 追加到默认系统提示词 |
-| `--system-prompt-file FILE` | 从文件加载系统提示词 |
-| `--append-system-prompt-file FILE` | 从文件追加系统提示词 |
+| `--system-prompt-file FILE` | 从文件加载系统提示词（注：未列在 `claude --help` 主清单，但实测可用） |
+| `--append-system-prompt-file FILE` | 从文件追加系统提示词（同上） |
 | `--add-dir DIR` | 添加额外可访问目录（可重复） |
 | `--mcp-config CONFIG` | 加载 MCP server 配置（JSON 文件或字符串） |
 
@@ -139,21 +149,21 @@ claude -p "后续提问" --output-format json --permission-mode bypassPermission
 | 场景 | model | effort | permission-mode | 其他 flags |
 |------|-------|--------|-----------------|-----------|
 | 复杂编码 | `opus` | `high` | `bypassPermissions` | — |
-| 一般编码 | `opus` | `high` | `bypassPermissions` | — |
+| 一般编码 | `opus` | `medium` | `bypassPermissions` | — |
 | 代码审查 | `opus` | `medium` | `plan` | `--allowedTools "Read,Grep,Glob"` |
-| 快速问答 | `sonnet` | `medium` | `bypassPermissions` | `--no-session-persistence` |
+| 快速问答 | `sonnet` | `medium` | `bypassPermissions` | `--no-session-persistence`（⚠️ 不可恢复） |
 | 隔离执行 | `opus` | `high` | `bypassPermissions` | `--worktree feature-x` |
 
 ## 使用规则
 
 1. **始终用 `--output-format json`**：确保输出可解析，提取 `session_id` 和 `result`
-3. **始终显式传 `--model` 和 `--effort`**：根据任务复杂度选择
-4. **始终在目标项目目录下运行**（用 `cd` 切到项目目录）
-5. **编码任务用 `--permission-mode bypassPermissions`**：避免子进程交互式确认
-6. **审查任务限制工具**：`--allowedTools "Read,Grep,Glob"` 防止意外修改
-7. **保持对话连续**：同一任务的追问复用 `session_id`
-8. **向用户报告结果**：从 JSON 中提取 `result` 字段，简要总结给用户
-9. **关注成本**：从 `total_cost_usd` 跟踪花费，长任务建议设 `--max-budget-usd`
+2. **始终显式传 `--model` 和 `--effort`**：根据任务复杂度选择
+3. **始终在目标项目目录下运行**（用 `cd` 切到项目目录）
+4. **编码任务用 `--permission-mode bypassPermissions`**：避免子进程交互式确认
+5. **审查任务限制工具**：`--allowedTools "Read,Grep,Glob"` 防止意外修改
+6. **保持对话连续**：同一任务的追问复用 `session_id`；**只要可能追问就别加 `--no-session-persistence`**，否则会话不可恢复
+7. **向用户报告结果**：从 JSON 中提取 `result` 字段，简要总结给用户
+8. **关注成本**：从 `total_cost_usd` 跟踪花费，长任务建议设 `--max-budget-usd`
 
 ## 示例
 
