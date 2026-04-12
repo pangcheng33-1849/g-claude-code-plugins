@@ -90,6 +90,8 @@ Collect at minimum:
 
 - public `IPv4`
 - public `IPv6`
+- active default interface
+- active network service name when derivable
 - `DNS` resolvers
 - default route
 - `utun` presence and state
@@ -127,6 +129,8 @@ The skill should read and report, as available:
 - `Remote Data`
 - `Remote IP Services`
 - `Via WebRTC`
+
+If the page is blocked by a challenge page, `403`, or missing required result sections, the workflow should retry once with a headed/persistent Chrome session. If still blocked, the report should continue with browser validation marked as blocked or partial rather than failing the entire diagnosis.
 
 Expected server-response fields include:
 
@@ -220,8 +224,10 @@ If a source fails, the report must state whether the failure means:
 Include:
 
 - [webbrowsertools IP Address](https://webbrowsertools.com/ip-address/)
+- browser validation status: `success` / `partial` / `blocked by challenge` / `unavailable`
 - top-level `IP Addresses` result
 - all visible `From Server Response` rows
+- all visible `Remote Data` rows
 - all visible `Remote IP Services` rows
 - all visible `Via WebRTC` rows
 

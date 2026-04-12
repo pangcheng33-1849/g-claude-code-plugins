@@ -94,11 +94,24 @@ open -Ra "Google Chrome"
 
 ```bash
 route -n get default
+route -n get default | awk '/interface:/{print $2}'
+networksetup -listallhardwareports
 netstat -rn -f inet6 | sed -n '1,80p'
 scutil --dns
 ifconfig | grep -E -A3 '^(en0|en1|utun[0-9]+):'
-networksetup -getinfo Wi-Fi
 ```
+
+然后：
+
+- 先从 `route -n get default` 提取当前默认接口，例如 `en0`
+- 再用 `networksetup -listallhardwareports` 把接口映射到对应的网络服务名
+- 只有在映射到明确服务名后，才执行：
+
+```bash
+networksetup -getinfo "<实际服务名>"
+```
+
+- 如果映射不出来，报告里写明 `networksetup service unresolved`，不要硬编码成 `Wi-Fi`
 
 目标：
 
@@ -113,14 +126,14 @@ networksetup -getinfo Wi-Fi
 至少执行：
 
 ```bash
-curl -4sS https://api.ipify.org
-curl -6sS https://api64.ipify.org
-curl -4sS https://ipinfo.io/json
-curl -6sS https://ipinfo.io/json
-curl -4sS https://ifconfig.co/json
-curl -6sS https://ifconfig.co/json
-curl -4sS https://api.ip.sb/geoip
-curl -6sS https://api.ip.sb/geoip
+curl --connect-timeout 8 --max-time 15 -4sS https://api.ipify.org
+curl --connect-timeout 8 --max-time 15 -6sS https://api64.ipify.org
+curl --connect-timeout 8 --max-time 15 -4sS https://ipinfo.io/json
+curl --connect-timeout 8 --max-time 15 -6sS https://ipinfo.io/json
+curl --connect-timeout 8 --max-time 15 -4sS https://ifconfig.co/json
+curl --connect-timeout 8 --max-time 15 -6sS https://ifconfig.co/json
+curl --connect-timeout 8 --max-time 15 -4sS https://api.ip.sb/geoip
+curl --connect-timeout 8 --max-time 15 -6sS https://api.ip.sb/geoip
 dig +short txt ch whoami.cloudflare @1.1.1.1
 ```
 
@@ -145,6 +158,7 @@ dig +short txt ch whoami.cloudflare @1.1.1.1
 
 ```bash
 playwright-cli open --browser=chrome https://webbrowsertools.com/ip-address/
+playwright-cli eval "document.title"
 playwright-cli eval "document.body.innerText"
 playwright-cli snapshot
 ```
@@ -155,6 +169,33 @@ playwright-cli snapshot
 playwright-cli console
 playwright-cli network
 ```
+
+如果出现以下任一情况：
+
+- 页面标题或正文包含 `请稍候`
+- 页面标题或正文包含 `Just a moment`
+- 页面标题或正文包含 `Verify you are human`
+- 页面内容明显是 `Cloudflare` 挑战页
+- `playwright-cli network` 或控制台显示主页面请求 `403`
+- 页面里看不到 `IP Addresses`、`From Server Response`、`Via WebRTC` 这些关键分组
+
+则执行一次受限重试：
+
+```bash
+playwright-cli close
+playwright-cli open --browser=chrome --headed --persistent https://webbrowsertools.com/ip-address/
+playwright-cli eval "document.title"
+playwright-cli eval "document.body.innerText"
+playwright-cli snapshot
+```
+
+如果重试后仍然是挑战页、403、或关键分组缺失：
+
+- 不要让整份诊断失败
+- 在报告中把浏览器交叉验证状态写成 `blocked by challenge / partial / unavailable`
+- 明确记录看到的标题、错误、403 或挑战页提示
+- 继续完成本地网络栈和外部出口部分的报告
+- 把 `webbrowsertools` 标成“浏览器侧验证受阻，需人工复查”
 
 报告里尽量详细记录这些动态结果分组：
 
@@ -230,8 +271,10 @@ playwright-cli network
 #### 浏览器交叉验证
 
 - 页面： [webbrowsertools IP Address](https://webbrowsertools.com/ip-address/)
+- 浏览器交叉验证状态：`success / partial / blocked by challenge / unavailable`
 - `IP Addresses`
 - `From Server Response` 各项
+- `Remote Data` 各项
 - `Remote IP Services` 各项
 - `Via WebRTC` 各项
 
@@ -244,6 +287,7 @@ playwright-cli network
 - 是否存在浏览器侧 `WebRTC` 泄露：`是 / 否 / 待核实`
 - `Server Response` 中看到的公网地址是否只是直连网站的正常现象：`是 / 否`
 - 是否确认存在独立公网 `IPv6`：`是 / 否 / 待核实`
+- 浏览器交叉验证是否被挑战页或 403 阻断：`是 / 否`
 
 ### 解决方案
 
