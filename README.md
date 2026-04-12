@@ -33,20 +33,20 @@ Use `/plugin install` when you want the full plugin package, including plugin me
 
 If you only want the raw `SKILL.md` content, you can install skills directly with `npx skills`.
 
-Recommended: use the repository URL directly with `npx skills add` for interactive installation. The CLI will discover nested skills in this repo and let you choose what to install.
+Recommended: use the repository slug (`org/repo`) directly with `npx skills add` for interactive installation. The CLI will discover nested skills in this repo and let you choose what to install.
 
 ```bash
 # Recommended: interactive installation
-npx skills add https://github.com/Ben2pc/g-claude-code-plugins
+npx skills add Ben2pc/g-claude-code-plugins
 
 # Install one skill to Codex
-npx skills add https://github.com/Ben2pc/g-claude-code-plugins -a codex -s feishu-channel
+npx skills add Ben2pc/g-claude-code-plugins -a codex -s feishu-channel
 
 # Install all repository skills to Claude Code
-npx skills add https://github.com/Ben2pc/g-claude-code-plugins -a claude-code -s '*'
+npx skills add Ben2pc/g-claude-code-plugins -a claude-code -s '*'
 
 # List available skills without installing
-npx skills add https://github.com/Ben2pc/g-claude-code-plugins --list
+npx skills add Ben2pc/g-claude-code-plugins --list
 ```
 
 ## Available Plugins
@@ -65,10 +65,12 @@ Skills that live outside plugins, under `skills/` at the repo root:
 |-------|-------------|
 | [claude-code-agent](./skills/claude-code-agent) | Delegate tasks to an independent Claude Code CLI instance |
 | [codex-agent](./skills/codex-agent) | Delegate tasks to Codex (GPT-5.4) via Codex CLI |
+| [ip-diagnosis](./skills/ip-diagnosis) | Diagnose public IPv4/IPv6, DNS, route, utun, and WebRTC exposure on macOS + Chrome |
 
 ```bash
 npx skills add Ben2pc/g-claude-code-plugins --skill claude-code-agent
 npx skills add Ben2pc/g-claude-code-plugins --skill codex-agent
+npx skills add Ben2pc/g-claude-code-plugins --skill ip-diagnosis
 ```
 
 ### Feishu / Lark Skills
