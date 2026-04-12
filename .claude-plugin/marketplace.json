@@ -35,13 +35,13 @@
     {
       "name": "claude-remote",
       "source": "./plugins/claude-remote",
-      "description": "Manage Claude Code remote-control sessions in Terminal.app for mobile access via OpenClaw",
-      "version": "0.1.0",
+      "description": "Manage Claude Code remote-control sessions in Terminal.app for mobile access",
+      "version": "0.2.0",
       "author": {
         "name": "Ben².pc"
       },
       "category": "productivity",
-      "tags": ["remote-control", "terminal", "openclaw", "session-manager"]
+      "tags": ["remote-control", "terminal", "session-manager"]
     }
   ]
 }

@@ -1,11 +1,11 @@
 ---
 name: claude-remote
-description: Manage Claude Code remote-control sessions in Terminal.app — start, stop, and list instances. Use when the user wants to launch, stop, or check remote-control sessions, or mentions OpenClaw, mobile access, or remote Claude. Triggers on "open/start/launch a claude for remote", "stop/close/kill session", "list/status sessions", "restart session".
+description: Manage Claude Code remote-control sessions in Terminal.app — start, stop, and list instances. Use when the user wants to launch, stop, or check remote-control sessions, or mentions mobile access or remote Claude. Triggers on "open/start/launch a claude for remote", "stop/close/kill session", "list/status sessions", "restart session".
 ---
 
 # Claude Remote Session Manager
 
-Manage Claude Code `--remote-control` sessions running in Terminal.app. Designed for remote desktop agents (OpenClaw, etc.) that let users control Claude Code from mobile devices.
+Manage Claude Code `--remote-control` sessions running in Terminal.app. Designed for remote desktop clients that let users control Claude Code from mobile devices.
 
 ## State Directory
 
@@ -50,7 +50,7 @@ If ambiguous, ask.
 
 ### Start Flow
 
-1. **Try to infer from context first.** If the user's message already contains a directory name or path (e.g., "start remote in openclaw", "launch claude in ~/Workspace/my-app"), use it directly — skip the directory picker. Also detect any options mentioned naturally (e.g., "with opus model" → `--model opus`).
+1. **Try to infer from context first.** If the user's message already contains a directory name or path (e.g., "launch claude in ~/Workspace/my-app"), use it directly — skip the directory picker. Also detect any options mentioned naturally (e.g., "with opus model" → `--model opus`).
 
 2. Only if the directory is unclear, list directories under `~/Workspace`:
    ```bash
@@ -70,7 +70,6 @@ If ambiguous, ask.
    | Permission mode | `--permission-mode <mode>` | `bypassPermissions` | `--permission-mode auto` |
    | Model | `--model <model>` | (user default) | `--model sonnet` or `--model opus` |
    | Session name | `-n <name>` | (auto) | `-n "mobile-debug"` |
-   | Resume last | `-c` | — | Continue most recent conversation in that directory |
    | Effort level | `--effort <level>` | (user default) | `--effort high` |
    | Worktree | `-w, --worktree [name]` | — | Create a git worktree for the session |
    If the user doesn't specify any, use defaults (no extra flags).
@@ -81,7 +80,20 @@ If ambiguous, ask.
    ```
    This opens Terminal.app via AppleScript, runs `claude --permission-mode bypassPermissions --remote-control [extra-flags]` in the chosen directory, and records the session.
 
-6. Report the session ID, directory, and window ID to the user. Mention they can now connect via OpenClaw or other remote control clients.
+6. Report the session ID, directory, and window ID to the user. Mention they can now connect via their remote control client.
+
+### Continue (Resume Last Conversation)
+
+When the user wants to pick up where they left off in a directory (triggers: "continue", "resume", "接着上次", "继续上次的对话"), pass the `-c` flag to the start flow. It tells `claude` to continue the most recent conversation in that directory instead of starting a fresh one.
+
+```bash
+bash <skill-dir>/scripts/session-manager.sh create <directory-path> -c [other-flags...]
+```
+
+Notes:
+- `-c` only resumes the **most recent** conversation in the chosen directory. If the user wants a specific older conversation, they'll need to use `claude --resume` interactively instead.
+- Combine freely with other flags (`--model`, `-n`, `-w`, etc.).
+- If no prior conversation exists in that directory, `claude` will fall back to a new session.
 
 ### Stop Flow
 

@@ -1,11 +1,11 @@
 {
   "name": "claude-remote",
-  "description": "Manage Claude Code remote-control sessions in Terminal.app for mobile access via OpenClaw",
-  "version": "0.1.0",
+  "description": "Manage Claude Code remote-control sessions in Terminal.app for mobile access",
+  "version": "0.2.0",
   "author": {
     "name": "Ben².pc"
   },
   "license": "MIT",
-  "keywords": ["remote-control", "terminal", "openclaw", "session-manager"],
+  "keywords": ["remote-control", "terminal", "session-manager"],
   "skills": "./skills"
 }
