@@ -136,7 +136,7 @@ codex exec review [OPTIONS] [PROMPT]
 | 一般编码 | `gpt-5.4-mini` | `workspace-write` | `--full-auto` |
 | 代码审查 | `gpt-5.4-mini` | `read-only` | — |
 | 代码审查（review） | `gpt-5.4-mini` | — | `codex exec review --base main` |
-| 快速问答 | `gpt-5.4-mini` | `read-only` | `--skip-git-repo-check` |
+| 快速问答 | `gpt-5.4-mini` | `read-only` | `--skip-git-repo-check --ephemeral`（⚠️ 不可恢复） |
 
 ## 使用规则
 

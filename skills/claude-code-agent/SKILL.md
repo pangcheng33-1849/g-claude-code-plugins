@@ -60,7 +60,7 @@ claude -p "后续提问" --output-format json --permission-mode bypassPermission
 - CI / 脚本中的临时调用，避免污染会话列表
 - 敏感任务，不希望在本地留下记录
 
-**只要后续可能需要追问，就不要加 `--no-session-persistence`。**
+**只要后续可能需要追问，就不要加 `--no-session-persistence`。** 与 `codex exec --ephemeral` 语义对等。
 
 ## claude -p 参数
 
@@ -111,8 +111,8 @@ claude -p "后续提问" --output-format json --permission-mode bypassPermission
 |------|------|
 | `--system-prompt PROMPT` | 替换默认系统提示词 |
 | `--append-system-prompt PROMPT` | 追加到默认系统提示词 |
-| `--system-prompt-file FILE` | 从文件加载系统提示词（注：未列在 `claude --help` 主清单，但实测可用） |
-| `--append-system-prompt-file FILE` | 从文件追加系统提示词（同上） |
+| `--system-prompt-file FILE` | 从文件加载系统提示词 |
+| `--append-system-prompt-file FILE` | 从文件追加系统提示词 |
 | `--add-dir DIR` | 添加额外可访问目录（可重复） |
 | `--mcp-config CONFIG` | 加载 MCP server 配置（JSON 文件或字符串） |
 
