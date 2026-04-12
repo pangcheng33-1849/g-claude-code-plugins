@@ -33,8 +33,6 @@ argument-hint: [可选：目标问题或补充上下文]
 5. `Server Response` 看到公网 IP，本身不等于浏览器泄露
 6. 只有 `Via WebRTC` 暴露出额外私网或异常公网地址时，才判浏览器侧泄露风险
 
-如需判读细则，读取 `references/reference.md`。
-
 ## 0. 依赖检查与安装
 
 先检查：

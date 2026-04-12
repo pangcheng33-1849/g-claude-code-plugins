@@ -44,7 +44,6 @@ This is a pure `SKILL.md` implementation.
 Expected contents:
 
 - `skills/ip-diagnosis/SKILL.md`
-- optional `skills/ip-diagnosis/references/reference.md`
 
 The skill prompt, not a custom script, defines the exact workflow, command order, reporting template, and judgment rules.
 
@@ -317,5 +316,5 @@ The implementation phase still needs to choose:
 
 - the exact installation command(s) for `playwright-cli`
 - the preferred external IP information sources
-- whether a companion reference file is needed or whether `SKILL.md` alone is sufficient
+- keep the implementation as `SKILL.md` only, unless future complexity justifies a separate reference file
 - whether to add `agents/openai.yaml` metadata for UI surfacing
