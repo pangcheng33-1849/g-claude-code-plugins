@@ -45,7 +45,7 @@ Parse what the user wants:
 | **stop** | "stop", "close", "kill", "shut down", "exit" |
 | **list** | "list", "status", "show", "which sessions", "what's running" |
 
-If ambiguous, ask. For "restart"-style requests, treat as **stop + start with `-c`** so the new session resumes the prior conversation.
+If ambiguous, ask.
 
 ### Start Flow
 
@@ -143,7 +143,6 @@ Notes:
 | "stop the my-app session" | `list` → match by directory → `stop <id>` |
 | "kill all remote sessions" | `stop-all` |
 | "what's running?" | `list` → render as table |
-| "restart the api-work session" | `stop <id>` → `create <same-dir> -c` |
 
 ## Important Notes
 
