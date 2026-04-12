@@ -331,6 +331,14 @@ networksetup -setv6automatic "Wi-Fi"
 - [webbrowsertools IP Address](https://webbrowsertools.com/ip-address/)
 - 本次用到的外部查询源链接或域名
 
+如果已经确认了具体公网 IP，建议额外给出把该 IP 直接带入的复查链接：
+
+- `https://ping0.cc/ip/<detected-ip>`
+- `https://iplark.com/<detected-ip>`
+- `https://ipinfo.io/<detected-ip>`
+
+这里的 `<detected-ip>` 应替换成报告中已确认的实际 `IPv4` 或 `IPv6`，不要硬编码成历史示例值。
+
 当 `WebRTC` 暴露是问题的一部分时，一并给出：
 
 - [WebRTC Protect - Protect IP Leak](https://chromewebstore.google.com/detail/webrtc-protect-protect-ip/bkmmlbllpjdpgcgdohbaghfaecnddhni)
