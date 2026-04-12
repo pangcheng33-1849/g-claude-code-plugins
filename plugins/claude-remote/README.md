@@ -1,6 +1,6 @@
 # claude-remote
 
-Manage Claude Code `--remote-control` sessions in Terminal.app. Designed for mobile access via OpenClaw and other remote desktop agents.
+Manage Claude Code `--remote-control` sessions in Terminal.app. Designed for mobile access via remote desktop clients.
 
 ## Requirements
 
