@@ -1,9 +1,9 @@
-# Network Diagnosis Skill Design
+# IP Diagnosis Skill Design
 
 Date: 2026-04-12
 Status: Draft approved in chat, written for repo review
 Target repo: `/Users/pangcheng/Workspace/g-claude-code-plugins`
-Target location: `skills/network-diagnosis/`
+Target location: `skills/ip-diagnosis/`
 
 ## Goal
 
@@ -43,8 +43,8 @@ This is a pure `SKILL.md` implementation.
 
 Expected contents:
 
-- `skills/network-diagnosis/SKILL.md`
-- optional `skills/network-diagnosis/references/reference.md`
+- `skills/ip-diagnosis/SKILL.md`
+- optional `skills/ip-diagnosis/references/reference.md`
 
 The skill prompt, not a custom script, defines the exact workflow, command order, reporting template, and judgment rules.
 
