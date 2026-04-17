@@ -1,6 +1,6 @@
 ---
 name: parallel-implementation
-description: Plan how to slice a non-trivial coding task across parallel subagents. Returns a dispatch plan (file assignments, dependencies, output-format contracts) — the main Agent then executes it with the Agent tool + `isolation: "worktree"`. Invoke during TDD green phase when implementation naturally spans multiple independent files, or when the user explicitly asks for parallel / multi-agent implementation.
+description: "Plan how to slice a non-trivial coding task across parallel subagents. Returns a dispatch plan (file assignments, dependencies, output-format contracts) — the main Agent then executes it with the Agent tool + `isolation: \"worktree\"`. Invoke during TDD green phase when implementation naturally spans multiple independent files, or when the user explicitly asks for parallel / multi-agent implementation."
 ---
 
 # Parallel Implementation
