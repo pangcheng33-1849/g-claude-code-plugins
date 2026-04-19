@@ -23,9 +23,12 @@ test("claude-code-agent skill keeps prompt references discoverable from SKILL.md
   assert.match(source, /\[references\/delegation-prompt-recipes\.md\]/);
   assert.match(source, /`stream-json` \*\*必须配 `--verbose`\*\*/);
   assert.match(source, /structured_output/);
+  assert.match(source, /`result` 可能为空/);
   assert.match(source, /`--continue` 自动续接当前目录最近一次会话/);
   assert.match(source, /cat logs\.txt \| claude -p/);
   assert.match(source, /`--bare`/);
+  assert.match(source, /不是稳定的中途增量入口/);
+  assert.match(source, /`Not logged in`/);
   assert.match(source, /`--max-turns`/);
   assert.match(source, /不要依赖 `\/commit` 之类交互式 slash commands/);
   assert.match(source, /`--worktree`/);

@@ -41,7 +41,7 @@ claude -p "你的任务描述" --output-format json --permission-mode bypassPerm
 - 从 `session_id` 提取会话 ID，用于后续多轮对话
 - 从 `result` 提取 Claude 的最终回复
 - 用 `is_error`、`subtype`、`usage`、`total_cost_usd` 判断是否出错并记录成本
-- 如果同时传了 `--json-schema`，结构化结果在 `structured_output` 字段里，`result` 仍然是自然语言摘要
+- 如果同时传了 `--json-schema`，真正受 schema 约束的结果在 `structured_output` 字段里；`result` 可能为空，不要把它当结构化结果读取
 
 ### 事件流输出（`stream-json`）
 
@@ -58,11 +58,11 @@ claude -p "你的任务描述" --output-format stream-json --verbose --model son
 ```
 
 - 自动化脚本通常以最后一条 `type == "result"` 作为最终结果
-- 若需要中间增量文本，可额外解析 `type == "assistant"` 的内容
+- `type == "assistant"` 更适合拿完成后的整条回复，不是稳定的中途增量入口
 - `system` / hook / rate-limit 事件是正常噪音；不要把它们当最终答案
 - `system/init` 会带上 model、tools、plugins、plugin_errors 等启动元数据；脚本想校验插件是否真的加载成功时，这个事件最有用
 
-如果你需要 token 级增量文本，追加 `--include-partial-messages`。常见筛法是只取 `type == "stream_event"` 且 `event.delta.type == "text_delta"` 的行。
+如果你需要 token 级增量文本，追加 `--include-partial-messages`，并解析 `type == "stream_event"` 且 `event.delta.type == "text_delta"` 的事件。
 
 ### 继续指定会话
 
@@ -343,8 +343,10 @@ cd /path/to/project && claude -p \
 
 ### 干净子进程 / prompt 实验
 
+先决条件：这个示例假设你已经通过 `ANTHROPIC_API_KEY` 或 `--settings` 里的 `apiKeyHelper` 提供鉴权。`--bare` 不会读取本地 OAuth / keychain，所以直接依赖 `claude auth login` 的环境会报 `Not logged in`。
+
 ```bash
-cd /path/to/project && claude -p \
+cd /path/to/project && ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" claude -p \
   "Review src/auth.ts for contract drift only." \
   --output-format json \
   --permission-mode plan \
