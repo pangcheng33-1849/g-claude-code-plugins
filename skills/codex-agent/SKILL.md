@@ -1,7 +1,6 @@
 ---
 name: codex-agent
-description: 通过 CLI 模式调用 Codex，将编码、审查、问答等任务委派给 Codex 执行。支持多轮对话自动续接（exec resume）、review 子命令、图片输入、结构化输出和多 session 并行。当用户要求使用 Codex 完成任务时触发。
-argument-hint: [任务描述]
+description: 通过 Codex CLI 将编码、审查、诊断、规划、结构化输出和本机浏览器调研任务委派给独立的 Codex 会话。使用场景包括 `codex exec` 新建任务、`codex exec resume` 续接多轮会话、`codex exec review` 做只读审查，以及需要 `--json` 事件流、`-o` 最终消息落盘、图片输入或 Computer Use 浏览器操作时。
 ---
 
 # Codex Agent
@@ -184,6 +183,16 @@ codex exec review [OPTIONS] [PROMPT]
 8. **向用户报告结果**：每次调用后，从 JSONL 中提取最终回复，简要总结给用户
 9. **区分 `-o` 和 `--json` 的职责**：`-o` 负责把最后一条回复落文件；`--json` 负责把整段事件流打印到 stdout。脚本常见组合是两者一起用。
 10. **非编码的本机浏览器任务优先 `read-only`**：如果只是让 Codex 用 Computer Use 打开 Chrome、浏览网页、总结内容，不需要 `--full-auto`；提示词里再补一句 `Do not modify local files.` 作为双保险。
+
+## Prompt References
+
+按任务类型按需加载对应 reference，不要把所有默认 prompt 一次性塞进主上下文：
+
+- **编码 / 诊断 / 规划 / 窄修复**：读 [references/task-prompt-recipes.md](references/task-prompt-recipes.md)
+- **代码审查 / 挑战式审查 / 测试缺口检查**：读 [references/review-prompt-recipes.md](references/review-prompt-recipes.md)
+- **本机浏览器调研 / Reddit 或社区采样 / 证据型总结**：读 [references/browser-research-prompt-recipes.md](references/browser-research-prompt-recipes.md)
+
+这些 reference 提供的是可直接复用或轻改的默认 prompt 模板；优先复制最接近的模板，再删掉不需要的块。
 
 ## 示例
 
