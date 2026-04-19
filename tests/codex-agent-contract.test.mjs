@@ -2,8 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import assert from "node:assert/strict";
+import { fileURLToPath } from "node:url";
 
-const ROOT = "/Users/pangcheng/Workspace/auriga-cli/external/g-claude-code-plugins";
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SKILL_ROOT = path.join(ROOT, "skills", "codex-agent");
 
 function read(relativePath) {
