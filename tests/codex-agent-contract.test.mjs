@@ -23,6 +23,10 @@ test("codex-agent skill keeps prompt references discoverable from SKILL.md", () 
   assert.match(source, /默认 prompt 模板/);
   assert.match(source, /本机浏览器调研（既要事件流，也要最终答案落盘）/);
   assert.match(source, /区分 `-o` 和 `--json` 的职责/);
+  assert.match(source, /长 prompt 用 stdin 管道/);
+  assert.match(source, /Reading additional input from stdin/);
+  assert.match(source, /prompt 超过约 500 字符或包含多行\/特殊字符时，不要继续用位置参数/);
+  assert.match(source, /--skip-git-repo-check - < \/tmp\/task-prompt\.txt/);
 });
 
 test("task prompt references cover diagnosis, narrow fix, and follow-up reuse", () => {
