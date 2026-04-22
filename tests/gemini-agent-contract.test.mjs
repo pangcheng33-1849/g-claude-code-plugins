@@ -34,8 +34,12 @@ test("gemini-agent skill keeps prompt references discoverable from SKILL.md", ()
   assert.match(source, /--list-sessions/);
   assert.match(source, /--delete-session/);
   assert.match(source, /cat logs\.txt \| gemini -p/);
-  assert.match(source, /cat \/tmp\/task-prompt\.md \| gemini -p/);
+  assert.match(source, /cat \.\/prompt\.md \| gemini --output-format json/);
+  assert.match(source, /cat \/tmp\/task-prompt\.md \| gemini \\/);
+  assert.match(source, /Not enough arguments following: p/);
   assert.match(source, /追加到 stdin 内容之后/);
+  assert.match(source, /TTY 下默认进交互模式/);
+  assert.match(source, /`-p` 必须带字符串参数/);
   assert.match(source, /`pro`/);
   assert.match(source, /`flash`/);
   assert.match(source, /`flash-lite`/);
@@ -53,6 +57,7 @@ test("gemini-agent skill keeps prompt references discoverable from SKILL.md", ()
   assert.match(source, /non-TTY/);
   assert.match(source, /"response":/);
   assert.match(source, /"stats":/);
+  assert.match(source, /"session_id":/);
   assert.match(source, /`init`/);
   assert.match(source, /`message`/);
   assert.match(source, /`tool_use`/);
